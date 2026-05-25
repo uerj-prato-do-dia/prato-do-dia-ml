@@ -1,0 +1,29 @@
+{
+  "task_id": 4,
+  "image": "data/input/imagem4.jpg",
+  "instance_mask": "data/ground_truth/imagem4_instances.png",
+  "class_mask": "data/ground_truth/imagem4_classes.png",
+  "instances": [
+    {
+      "instance_id": 1,
+      "class_id": 9,
+      "label": "egg",
+      "source": "data/labelstudio-to-png/task-4-annotation-4-by-1-label-egg-0.png",
+      "area_px": 31254
+    },
+    {
+      "instance_id": 2,
+      "class_id": 10,
+      "label": "other_food",
+      "source": "data/labelstudio-to-png/task-4-annotation-4-by-1-label-other_food-0.png",
+      "area_px": 50960
+    },
+    {
+      "instance_id": 3,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-4-annotation-4-by-1-label-tomato-0.png",
+      "area_px": 22574
+    }
+  ]
+}

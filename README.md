@@ -18,6 +18,9 @@ evaluation against deterministic ground truth masks.
 ```bash
 uv sync
 uv run python scripts/run_pipeline.py data/input/imagem1.jpg --confidence 0.05 --max-detections 3
+uv run python scripts/import_labelstudio_brush.py \
+  --brush-dir data/annotation_exports/labelstudio/brush_masks \
+  --coco-json data/annotation_exports/labelstudio/result_coco.json
 uv run python scripts/evaluate_pipeline.py --config configs/default.toml --confidence 0.05 --max-detections 3
 uv run python scripts/extract_features.py --config configs/default.toml
 ```
@@ -58,6 +61,7 @@ src/
 
 scripts/
   run_pipeline.py       # run one image
+  import_labelstudio_brush.py # convert transient Label Studio exports to GT PNGs
   evaluate_pipeline.py  # run dataset evaluation and overlays
   extract_features.py   # export feature rows from generated instance masks
 

@@ -40,6 +40,9 @@ def main() -> None:
         raise FileNotFoundError(f"no input images found in {config.paths.input_dir}")
 
     ground_truth_masks = _load_ground_truth_masks(image_paths, config.paths.ground_truth_dir)
+    image_paths = [path for path in image_paths if path.stem in ground_truth_masks]
+    if not image_paths:
+        raise FileNotFoundError(f"no PNG instance ground truth found in {config.paths.ground_truth_dir}")
 
     pipeline = FoodSegmentationPipeline.from_config(config)
 
@@ -94,7 +97,7 @@ def _ground_truth_path(ground_truth_dir: Path, image_stem: str) -> Path:
     path = ground_truth_dir / f"{image_stem}_instances.png"
     if path.exists():
         return path
-    raise FileNotFoundError(f"missing ground truth for {image_stem} in {ground_truth_dir}")
+    return path
 
 
 def _load_ground_truth_masks(
@@ -104,6 +107,8 @@ def _load_ground_truth_masks(
     masks = {}
     for image_path in image_paths:
         gt_path = _ground_truth_path(ground_truth_dir, image_path.stem)
+        if not gt_path.exists():
+            continue
         masks[image_path.stem] = (gt_path, validate_instance_mask_png(gt_path))
     return masks
 

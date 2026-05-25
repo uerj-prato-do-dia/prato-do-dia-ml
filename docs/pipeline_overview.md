@@ -150,3 +150,25 @@ flowchart LR
     K[data/ground_truth/*_instances.png] --> J
     J --> L[data/reports/evaluation_report.json]
 ```
+
+## Label Studio Ground Truth
+
+Brush exports from Label Studio can be reused as deterministic evaluation
+labels. The expected import path is:
+
+```text
+data/annotation_exports/labelstudio/brush_masks/*.png
+data/annotation_exports/labelstudio/result_coco.json
+  -> scripts/import_labelstudio_brush.py
+  -> data/ground_truth/<stem>_instances.png
+  -> data/ground_truth/<stem>_classes.png
+```
+
+The importer maps Label Studio tasks to `data/input/` by natural image order:
+`task-1` maps to `imagem1`, `task-2` maps to `imagem2`, and so on. This matches
+the current export for `imagem1` through `imagem8`; `imagem9` and `imagem10`
+remain unlabeled until new brush masks are exported.
+
+`data/annotation_exports/` is intentionally ignored by Git. It is a temporary
+drop location for raw Label Studio exports. The versioned artifacts are the
+canonical PNG masks and metadata in `data/ground_truth/`.

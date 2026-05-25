@@ -13,7 +13,7 @@ allow_alpha_input = true
 
 [yolo]
 model_path = "models/yolov11_food.onnx"
-imgsz = 1024
+imgsz = 640
 confidence_threshold = 0.15
 nms_iou_threshold = 0.45
 max_detections = 30

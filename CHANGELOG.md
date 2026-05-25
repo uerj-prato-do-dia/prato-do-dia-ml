@@ -7,6 +7,22 @@ phase-based version history until the first production release.
 
 ## [Unreleased]
 
+### Added
+
+- Added `scripts/import_labelstudio_brush.py` to convert Label Studio brush PNG
+  exports into single-channel instance and class PNG ground-truth masks.
+- Added canonical Label Studio-derived ground-truth masks under
+  `data/ground_truth/` for the currently labeled images.
+
+### Changed
+
+- Updated dataset evaluation to run on the labeled subset when some input
+  images do not yet have PNG instance ground truth.
+- Set the default YOLO input size to `640` to match the local ONNX model input
+  contract.
+- Treat raw Label Studio exports as transient ignored inputs under
+  `data/annotation_exports/`, keeping only canonical masks in version control.
+
 ## [0.2.0] - 2026-05-25
 
 ### Added

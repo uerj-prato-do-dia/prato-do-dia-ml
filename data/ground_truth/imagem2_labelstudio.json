@@ -1,0 +1,78 @@
+{
+  "task_id": 2,
+  "image": "data/input/imagem2.jpg",
+  "instance_mask": "data/ground_truth/imagem2_instances.png",
+  "class_mask": "data/ground_truth/imagem2_classes.png",
+  "instances": [
+    {
+      "instance_id": 1,
+      "class_id": 8,
+      "label": "asparagus",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-asparagus-0.png",
+      "area_px": 35392
+    },
+    {
+      "instance_id": 2,
+      "class_id": 6,
+      "label": "ground_beef",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-ground_beef-0.png",
+      "area_px": 42453
+    },
+    {
+      "instance_id": 3,
+      "class_id": 7,
+      "label": "potato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-potato-0.png",
+      "area_px": 36148
+    },
+    {
+      "instance_id": 4,
+      "class_id": 7,
+      "label": "potato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-potato-1.png",
+      "area_px": 2741
+    },
+    {
+      "instance_id": 5,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-0.png",
+      "area_px": 4549
+    },
+    {
+      "instance_id": 6,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-1.png",
+      "area_px": 2042
+    },
+    {
+      "instance_id": 7,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-2.png",
+      "area_px": 6101
+    },
+    {
+      "instance_id": 8,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-3.png",
+      "area_px": 1363
+    },
+    {
+      "instance_id": 9,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-4.png",
+      "area_px": 1607
+    },
+    {
+      "instance_id": 10,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-2-annotation-7-by-1-label-tomato-5.png",
+      "area_px": 2523
+    }
+  ]
+}

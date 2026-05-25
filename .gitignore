@@ -6,6 +6,13 @@ __pycache__/
 
 data/test_*_input.png
 data/test_*_output.png
+data/annotation_exports/
+data/labelstudio-to-png/
+data/labelstudio-to-coco/
+data/labelstudio-to-numpy/
+data/label-to-numpy/
+data/raw_segmentations/*.txt
+!data/raw_segmentations/.gitkeep
 data/overlays/*.jpg
 data/overlays/*.png
 data/masks/*.png

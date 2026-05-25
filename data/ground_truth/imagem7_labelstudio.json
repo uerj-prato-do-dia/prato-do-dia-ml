@@ -1,0 +1,29 @@
+{
+  "task_id": 7,
+  "image": "data/input/imagem7.jpg",
+  "instance_mask": "data/ground_truth/imagem7_instances.png",
+  "class_mask": "data/ground_truth/imagem7_classes.png",
+  "instances": [
+    {
+      "instance_id": 1,
+      "class_id": 5,
+      "label": "rice",
+      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-rice-0.png",
+      "area_px": 174868
+    },
+    {
+      "instance_id": 2,
+      "class_id": 13,
+      "label": "shoestring_potatoes",
+      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-shoestring_potatoes-0.png",
+      "area_px": 138049
+    },
+    {
+      "instance_id": 3,
+      "class_id": 14,
+      "label": "stroganoff",
+      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-stroganoff-0.png",
+      "area_px": 156198
+    }
+  ]
+}

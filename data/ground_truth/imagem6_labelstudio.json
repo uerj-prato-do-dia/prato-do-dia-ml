@@ -1,0 +1,57 @@
+{
+  "task_id": 6,
+  "image": "data/input/imagem6.jpg",
+  "instance_mask": "data/ground_truth/imagem6_instances.png",
+  "class_mask": "data/ground_truth/imagem6_classes.png",
+  "instances": [
+    {
+      "instance_id": 1,
+      "class_id": 3,
+      "label": "beans",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-beans-0.png",
+      "area_px": 32834
+    },
+    {
+      "instance_id": 2,
+      "class_id": 9,
+      "label": "egg",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-egg-0.png",
+      "area_px": 44901
+    },
+    {
+      "instance_id": 3,
+      "class_id": 4,
+      "label": "french_fries",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-french_fries-0.png",
+      "area_px": 44480
+    },
+    {
+      "instance_id": 4,
+      "class_id": 6,
+      "label": "ground_beef",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-ground_beef-0.png",
+      "area_px": 45946
+    },
+    {
+      "instance_id": 5,
+      "class_id": 2,
+      "label": "leafy_greens",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-leafy_greens-0.png",
+      "area_px": 19542
+    },
+    {
+      "instance_id": 6,
+      "class_id": 5,
+      "label": "rice",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-rice-0.png",
+      "area_px": 40143
+    },
+    {
+      "instance_id": 7,
+      "class_id": 1,
+      "label": "tomato",
+      "source": "data/labelstudio-to-png/task-6-annotation-3-by-1-label-tomato-0.png",
+      "area_px": 33113
+    }
+  ]
+}
