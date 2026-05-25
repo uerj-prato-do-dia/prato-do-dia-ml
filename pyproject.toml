@@ -1,0 +1,18 @@
+[project]
+name = "prato-do-dia-improved"
+version = "0.2.0"
+description = "YOLO11 and SAM 2 food segmentation pipeline for Prato do Dia."
+readme = "AGENTS.md"
+requires-python = ">=3.11"
+dependencies = [
+    "huggingface-hub>=1.14.0",
+    "numpy>=2.0.0",
+    "onnxruntime>=1.18.0",
+    "opencv-python>=4.10.0",
+    "pandas>=3.0.3",
+    "scikit-image>=0.26.0",
+    "scipy>=1.17.1",
+]
+
+[tool.uv]
+package = false

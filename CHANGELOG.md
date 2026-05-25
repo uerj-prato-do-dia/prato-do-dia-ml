@@ -1,0 +1,116 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog, and this project uses a simple
+phase-based version history until the first production release.
+
+## [Unreleased]
+
+## [0.2.0] - 2026-05-25
+
+### Added
+
+- Added `configs/default.toml` and `src/config.py` for typed TOML pipeline
+  configuration covering paths, image background handling, YOLO, SAM 2,
+  post-processing, and evaluation defaults.
+- Added `src/io_utils.py` for deterministic image loading, RGBA-to-background
+  normalization, input discovery, and strict single-channel PNG ground-truth
+  validation.
+- Added `src/postprocessing.py` for component filtering, small-hole filling,
+  polygon regeneration, instance/class mask rendering, and deterministic
+  overlap resolution.
+- Added richer pipeline artifacts: YOLO TXT, instance PNG masks, class PNG
+  masks, per-image metadata JSON, and overlays.
+- Added instance-level evaluation metrics: IoU, Dice, boundary F-score,
+  precision/recall, missed instances, false positives, and area error.
+- Added `src/feature_extraction.py` for per-instance color, texture, shape, and
+  position features with CSV export support.
+- Added `scripts/extract_features.py` to export feature rows from generated
+  instance masks into `data/features/features.csv`.
+- Added `docs/pipeline_overview.md` with the mobile capture, backend API draft,
+  algorithm boundary, and artifact flow diagrams.
+- Added `scripts/test_phase3_outputs.py` smoke coverage for YOLO TXT
+  rasterization, PNG ground-truth validation, IoU/Dice, and overlap resolution.
+- Added `scikit-image`, `scipy`, and `pandas` through `uv add` for morphology,
+  matching, metrics, and feature tables.
+- Added Phase 3 evaluation focus to `AGENTS.md`: IoU metrics and visual
+  validation against deterministic ground truth.
+- Added `src/metrics.py` with exact RGB color-to-class ground-truth mapping,
+  YOLO polygon rasterization, foreground mask extraction, and IoU calculation.
+- Added `src/visualizer.py` for semi-transparent polygon overlays and bounding
+  boxes on original images.
+- Added `scripts/evaluate_pipeline.py` to iterate over `data/input/`, run
+  inference, save overlays to `data/overlays/`, compare against
+  `data/ground_truth/`, and write `data/evaluation_report.json`.
+- Documented `data/ground_truth/` as the deterministic mask source and
+  `data/overlays/` as generated visual validation output.
+- Added ignore rules for generated overlays and evaluation reports.
+- Added real Phase 2 inference execution for YOLOv11 and SAM 2 ONNX models
+  using `onnxruntime` on `CPUExecutionProvider`.
+- Added YOLOv11 output decoding from `[1, 84, 8400]` into `[x1, y1, x2, y2]`
+  detections with confidence filtering and NMS.
+- Added SAM 2 split encoder/decoder execution using `image_embed`,
+  `high_res_feats_0`, `high_res_feats_1`, `point_coords`, `point_labels`,
+  `mask_input`, and `has_mask_input`.
+- Added `scripts/run_pipeline.py` for command-line inference on one image.
+- Added `huggingface_hub` through `uv add` for ONNX weight acquisition support.
+- Added Phase 2 ONNX interface scaffolding for the YOLOv11 detector and SAM 2
+  segmenter, constrained to `CPUExecutionProvider`.
+- Added shared dataclasses for detections, segmentation masks, and pipeline
+  results.
+- Added YOLO segmentation TXT writer for normalized polygon annotations.
+- Added `FoodSegmentationPipeline` orchestration scaffold for image loading,
+  detection, segmentation, and annotation output.
+- Added `scripts/test_phase2_interfaces.py` to validate real local ONNX model
+  loading and one end-to-end image inference.
+- Added `models/` as the expected local location for ONNX weights while
+  ignoring model binaries in Git.
+- Added `data/input/` as the expected local location for test meal images.
+- Added `pyproject.toml` as the single dependency manifest for `uv`.
+- Added minimal dependencies for the Phase 1 preprocessing scaffold:
+  `numpy`, `opencv-python`, and `onnxruntime`.
+- Added `data/raw_segmentations/` for future YOLO segmentation TXT outputs.
+- Added `src/preprocessing.py` with strict aspect-ratio-preserving
+  `letterbox_image` support and BGR-to-RGB float normalization.
+- Added `scripts/test_preprocessing.py` smoke test that loads an image,
+  applies letterboxing without stretching, validates normalization, and saves
+  the result.
+- Added `.gitignore` entries for virtual environments, Python caches, and
+  generated preprocessing smoke-test images.
+
+### Changed
+
+- Updated `scripts/run_pipeline.py` and `scripts/evaluate_pipeline.py` to load
+  `configs/default.toml`, while preserving CLI overrides for confidence and
+  max detections.
+- Replaced foreground-only evaluation with instance-PNG evaluation using
+  `data/ground_truth/<stem>_instances.png`.
+- Replaced Phase 2 `NotImplementedError` placeholders with real ONNX Runtime
+  execution paths.
+- Updated `scripts/test_phase2_interfaces.py` to use the real local ONNX
+  weights and images from `data/input/`.
+- Reworked the repository around the YOLOv11 + SAM 2 direction described in
+  `AGENTS.md`.
+- Replaced the previous scikit-image segmentation preprocessing stack with a
+  minimal OpenCV/NumPy preprocessing module.
+- Transitioned dependency management from `requirements.txt` to `uv`.
+
+### Removed
+
+- Deleted `requirements.txt`; dependencies now live exclusively in
+  `pyproject.toml` and the generated `uv.lock`.
+- Deleted the legacy SLIC/Felzenszwalb/Optuna experiment pipeline:
+  `pipelines/`, `config.py`, `example_usage.py`, `src/features.py`,
+  `src/metrics.py`, and `src/segmentation.py`.
+- Deleted generated or legacy artifacts: `assets/`, `comparison_results.png`,
+  `example_evaluation.png`, `__pycache__/`, and `src/__pycache__/`.
+- Deleted obsolete documentation from the previous architecture:
+  `README.md`, `ANALISE_CRITICA.md`, `EXECUTIVE_SUMMARY.md`, `INDEX.md`,
+  `START_HERE.txt`, and `aaa.MD`.
+- Deleted the explicitly deprecated `old/` folder and empty legacy work areas
+  `experiments/` and `notebooks/`.
+- Deleted the legacy checked-in `.venv/`; local environments are now recreated
+  with `uv sync` and ignored by Git.
+- Removed the stub-only pipeline smoke test after real ONNX inference became
+  available.
