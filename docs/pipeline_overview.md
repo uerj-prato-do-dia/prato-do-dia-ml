@@ -1,174 +1,131 @@
-# Prato do Dia Pipeline Overview
+# Visão Geral do Pipeline
 
-This document sketches the full product flow while keeping this repository
-focused on the segmentation and identification algorithm.
+Este documento descreve a fronteira metodológica do repositório. A proposta é
+manter um pipeline pequeno, reprodutível e adequado para investigação inicial
+em segmentação de alimentos a partir de imagens de pratos.
 
-## End-to-End Flow
+## Escopo
+
+O repositório cobre a etapa de visão computacional:
+
+- preparar a imagem de entrada sem distorcer sua geometria;
+- detectar regiões candidatas de alimento com YOLO11;
+- usar as caixas detectadas como prompts para o SAM 2;
+- converter máscaras para artefatos simples de versionar e avaliar;
+- comparar predições com máscaras de referência;
+- extrair atributos iniciais das instâncias segmentadas.
+
+Ficam fora deste escopo, por enquanto, a interface mobile, o backend de produto,
+o banco de dados nutricional e o modelo final de identificação alimentar.
+
+## Fluxo Experimental
 
 ```mermaid
 flowchart TD
-    A[Mobile app camera screen] --> B[Top-down plate guide overlay]
-    B --> C[Client validates focus, framing, and lighting]
-    C --> D[Client applies EXIF rotation and light downscaling]
-    D --> E[Upload image and capture metadata]
-    E --> F[Backend API receives meal image]
-    F --> G[Persist original upload for traceability]
-    G --> H[Normalize image to canonical RGB input]
-    H --> I[YOLO11 ONNX food detection]
-    I --> J[Food bounding boxes]
-    J --> K[SAM 2 ONNX encoder once per image]
-    K --> L[SAM 2 ONNX decoder per YOLO box]
-    L --> M[Binary instance masks]
-    M --> N[Mask cleanup and overlap resolution]
-    N --> O[YOLO TXT polygons and PNG masks]
-    O --> P[Feature extraction]
-    P --> Q[Food identification and nutrition estimation]
-    Q --> R[Backend response]
-    R --> S[Mobile app shows editable meal log]
+    A[data/input] --> B[Leitura e normalização]
+    B --> C[Letterbox YOLO 640]
+    C --> D[YOLO11 ONNX]
+    D --> E[Caixas candidatas]
+    B --> F[Letterbox SAM 1024]
+    E --> G[SAM 2 decoder por caixa]
+    F --> H[SAM 2 encoder por imagem]
+    H --> G
+    G --> I[Máscaras binárias]
+    I --> J[Limpeza e sobreposição]
+    J --> K[YOLO TXT]
+    J --> L[Máscaras PNG]
+    L --> M[Métricas]
+    L --> N[Atributos]
 ```
 
-## Mobile App Draft
+O desenho separa duas funções: YOLO11 reduz o espaço de busca ao localizar
+alimentos prováveis; SAM 2 refina a região em uma máscara de instância. Essa
+separação facilita testes em CPU e permite trocar detector, limiares ou
+pos-processamento sem alterar toda a arquitetura.
 
-The mobile app should stay responsible for capture ergonomics, not model
-preprocessing.
+## Dados de Entrada
 
-Expected responsibilities:
+As imagens de estudo ficam em `data/input/`. A captura ideal é feita de cima
+(`top-down`), com prato centralizado, boa iluminação e baixa oclusão. Essas
+condições ainda não resolvem o problema, mas reduzem variáveis externas que
+atrapalham a análise do modelo.
 
-- Show a top-down plate overlay so the meal is centered and consistently sized.
-- Warn on obvious capture problems such as blur, strong shadows, or clipped
-  plate boundaries.
-- Apply EXIF rotation before upload.
-- Optionally downscale very large phone images to reduce network cost.
-- Preserve the original image format when possible and upload metadata such as
-  device model, timestamp, approximate focal length, and client app version.
-- Do not letterbox, normalize tensors, run model-specific color conversion, or
-  alter masks client-side.
-
-Example upload payload:
-
-```json
-{
-  "image": "<multipart file>",
-  "capture": {
-    "client_image_width": 1536,
-    "client_image_height": 2048,
-    "exif_rotation_applied": true,
-    "plate_overlay_version": "draft-1",
-    "captured_at": "2026-05-25T17:00:00Z"
-  }
-}
-```
-
-## Backend API Draft
-
-The backend API should be a thin orchestrator around this repository's
-algorithm package. It should not duplicate detector, segmenter, postprocessing,
-or metric logic.
-
-Suggested endpoints:
+As anotações de referência ficam em `data/ground_truth/`:
 
 ```text
-POST /v1/meals:analyze
-  multipart image upload
-  returns meal analysis job result or accepted job ID
-
-GET /v1/meals/{meal_id}
-  returns stored analysis, nutrition estimates, and user corrections
-
-PATCH /v1/meals/{meal_id}
-  saves user corrections to food labels, quantities, or masks
+<imagem>_instances.png
+<imagem>_classes.png
+<imagem>_labelstudio.json
+class_map.json
 ```
 
-Synchronous response sketch:
+Para avaliação quantitativa, a máscara de instância deve ser PNG de canal
+único. Cada valor diferente de zero representa uma instância anotada. Máscaras
+em JPEG não devem ser usadas porque a compressão altera os valores dos pixels.
 
-```json
-{
-  "meal_id": "meal_123",
-  "image": {
-    "width": 294,
-    "height": 291
-  },
-  "instances": [
-    {
-      "instance_id": 1,
-      "food_label": "rice",
-      "food_confidence": 0.82,
-      "segmentation": {
-        "class_id": 0,
-        "polygon": [[0.34, 0.15], [0.42, 0.17], [0.51, 0.31]],
-        "area_px": 6940
-      },
-      "nutrition_estimate": {
-        "grams": 120,
-        "calories": 156,
-        "protein_g": 3.2,
-        "carbs_g": 34.0,
-        "fat_g": 0.4
-      }
-    }
-  ],
-  "artifacts": {
-    "annotation_txt": "data/raw_segmentations/imagem1.txt",
-    "instance_mask_png": "data/masks/imagem1_instances.png",
-    "metadata_json": "data/reports/imagem1.json"
-  }
-}
-```
-
-## Algorithm Boundary
-
-This repository owns:
-
-- Server-side image loading and RGBA/background normalization.
-- Letterbox preprocessing for YOLO11 and SAM 2.
-- ONNX Runtime CPU inference.
-- YOLO box decoding and NMS.
-- SAM 2 box-prompted masks.
-- Deterministic mask postprocessing and overlap resolution.
-- YOLO TXT polygon export.
-- Instance/class PNG mask export.
-- Evaluation against single-channel PNG ground truth.
-- Feature extraction from segmented instances.
-
-Future API/mobile implementation should call this pipeline instead of
-reimplementing these steps.
-
-## Artifact Flow
+## Artefatos
 
 ```mermaid
 flowchart LR
-    A[data/input/*.png or *.jpg] --> B[FoodSegmentationPipeline]
+    A[data/input/*.jpg ou *.png] --> B[FoodSegmentationPipeline]
     B --> C[data/raw_segmentations/*.txt]
     B --> D[data/masks/*_instances.png]
     B --> E[data/masks/*_class.png]
-    B --> F[data/reports/*.json]
-    B --> G[data/overlays/*_overlay.jpg]
-    D --> H[Feature extraction]
-    A --> H
+    B --> F[data/overlays/*_overlay.jpg]
+    B --> G[data/reports/*.json]
+    D --> H[scripts/extract_features.py]
     H --> I[data/features/features.csv]
-    D --> J[Evaluation]
+    D --> J[scripts/evaluate_pipeline.py]
     K[data/ground_truth/*_instances.png] --> J
     J --> L[data/reports/evaluation_report.json]
 ```
 
-## Label Studio Ground Truth
+Os arquivos em `data/raw_segmentations/`, `data/masks/`, `data/overlays/`,
+`data/reports/`, `data/features/` e `outputs/` são saídas derivadas. Em geral,
+eles devem ser regenerados a partir de imagens, configurações e modelos.
 
-Brush exports from Label Studio can be reused as deterministic evaluation
-labels. The expected import path is:
+## Anotações com Label Studio
+
+Exportações brutas do Label Studio são tratadas como insumo temporário:
 
 ```text
 data/annotation_exports/labelstudio/brush_masks/*.png
 data/annotation_exports/labelstudio/result_coco.json
-  -> scripts/import_labelstudio_brush.py
-  -> data/ground_truth/<stem>_instances.png
-  -> data/ground_truth/<stem>_classes.png
 ```
 
-The importer maps Label Studio tasks to `data/input/` by natural image order:
-`task-1` maps to `imagem1`, `task-2` maps to `imagem2`, and so on. This matches
-the current export for `imagem1` through `imagem8`; `imagem9` and `imagem10`
-remain unlabeled until new brush masks are exported.
+Elas podem ser convertidas para máscaras canônicas com:
 
-`data/annotation_exports/` is intentionally ignored by Git. It is a temporary
-drop location for raw Label Studio exports. The versioned artifacts are the
-canonical PNG masks and metadata in `data/ground_truth/`.
+```bash
+uv run python scripts/import_labelstudio_brush.py \
+  --brush-dir data/annotation_exports/labelstudio/brush_masks \
+  --coco-json data/annotation_exports/labelstudio/result_coco.json
+```
+
+O importador associa tarefas às imagens por ordem natural: `task-1` corresponde
+a `imagem1`, `task-2` a `imagem2`, e assim por diante. Para reimportar uma
+tarefa específica:
+
+```bash
+uv run python scripts/import_labelstudio_brush.py --brush-dir data/png --task-id 4
+```
+
+## Validação
+
+A avaliação combina métricas globais e por instância:
+
+- IoU e Dice para sobreposição entre predição e referência;
+- precision/recall por instância para medir objetos perdidos ou extras;
+- erro de área para observar distorção de tamanho;
+- overlays para inspeção qualitativa de falhas.
+
+Essa combinação é importante porque uma média global pode esconder erros
+relevantes, como pequenos alimentos perdidos, máscaras sobrepostas ou detecções
+em regiões que não são alimento.
+
+## Integração Futura
+
+Em uma versão de produto, o aplicativo mobile deve cuidar apenas da captura:
+orientação, enquadramento, metadados e envio da imagem. O backend deve chamar
+este pipeline como módulo de análise, preservando a mesma configuração usada
+nos experimentos. Essa separação ajuda a manter rastreabilidade entre resultados
+de pesquisa e comportamento do sistema.

@@ -1,112 +1,152 @@
-# Prato do Dia - Computer Vision Pipeline
+# Prato do Dia - Pipeline de Visão Computacional
 
-Prato do Dia is a food photo processing pipeline for top-down meal images. The
-current backend flow detects food regions with YOLOv11, prompts SAM 2 with those
-boxes, saves segmentation polygons in YOLO TXT format, and supports visual/IoU
-evaluation against deterministic ground truth masks.
+Este repositório reúne o protótipo de segmentação de alimentos do projeto
+Prato do Dia. O objetivo é estudar um fluxo reprodutível para imagens de
+refeições capturadas de cima, combinando detecção por YOLO11 e segmentação
+guiada por caixas com SAM 2.
 
-## Current Status
+O foco atual é experimental: produzir máscaras de instância, avaliar sua
+qualidade contra anotações de referência e organizar artefatos que possam
+apoiar etapas futuras de identificação alimentar e estimativa nutricional.
 
-| Phase | Status | Output |
+## Situação Atual
+
+| Etapa | Situação | Entrega principal |
 | --- | --- | --- |
-| Phase 1 | Complete | `uv`, preprocessing, letterboxing |
-| Phase 2 | Complete | ONNX YOLOv11 + SAM 2 inference |
-| Phase 3 | In progress | overlays, IoU evaluation, label validation |
+| 1. Pré-processamento | concluída | leitura de imagem, normalização RGB e letterbox |
+| 2. Inferência | concluída | YOLO11 + SAM 2 em ONNX Runtime CPU |
+| 3. Validação | em andamento | máscaras PNG, overlays, IoU e métricas por instância |
+| 4. Caracterização | inicial | extração de atributos de cor, textura, forma e posição |
 
-## Quick Commands
+## Hipótese de Trabalho
+
+O pipeline parte da seguinte pergunta de pesquisa:
+
+> Uma combinação leve de detector de objetos e segmentador por prompt consegue
+> gerar máscaras de alimentos suficientemente estáveis para apoiar a
+> identificação e a estimativa de porções em imagens de pratos?
+
+Nesta fase, a prioridade não é entregar um aplicativo completo, mas manter uma
+base técnica simples, testável e adequada para comparação entre experimentos.
+
+## Fluxo Metodológico
+
+```mermaid
+flowchart LR
+    A[Imagem do prato] --> B[Pré-processamento]
+    B --> C[YOLO11 ONNX]
+    C --> D[Caixas de alimentos]
+    D --> E[SAM 2 ONNX]
+    E --> F[Máscaras de instância]
+    F --> G[Pós-processamento]
+    G --> H[YOLO TXT e PNG]
+    H --> I[Avaliação e atributos]
+```
+
+Principais saídas geradas:
+
+- `data/raw_segmentations/`: polígonos no formato YOLO segmentation.
+- `data/masks/`: máscaras PNG de instância e classe.
+- `data/overlays/`: visualizações para inspeção qualitativa.
+- `data/reports/`: metadados e métricas de avaliação.
+- `data/features/`: atributos extraídos das instâncias segmentadas.
+
+## Como Reproduzir
+
+Instale as dependências principais:
 
 ```bash
 uv sync
+```
+
+Valide o código sem exigir modelos locais:
+
+```bash
 uv run ruff format --check .
 uv run ruff check .
 uv run pytest
+```
 
+Para executar inferência real, coloque os modelos ONNX em `models/`:
+
+```text
+models/yolov11_food.onnx
+models/sam2.1_hiera_tiny.encoder.onnx
+models/sam2.1_hiera_tiny.decoder.onnx
+```
+
+Em seguida, rode um exemplo:
+
+```bash
 uv run python scripts/run_pipeline.py data/input/imagem1.jpg --confidence 0.05 --max-detections 3
-uv run python scripts/import_labelstudio_brush.py \
-  --brush-dir data/annotation_exports/labelstudio/brush_masks \
-  --coco-json data/annotation_exports/labelstudio/result_coco.json
-uv run python scripts/import_labelstudio_brush.py --brush-dir data/png --task-id 4
-uv run python scripts/evaluate_pipeline.py --config configs/default.toml --confidence 0.05 --max-detections 3
-uv run python scripts/extract_features.py --config configs/default.toml
-uv run python scripts/render_mask_previews.py --mask-dir data/ground_truth --overlay
-uv run python scripts/run_experiment.py --config configs/experiments/yolo11_sam2_baseline.toml --experiment-name smoke --limit 3 --overwrite
+```
+
+Para avaliar imagens com anotação de referência:
+
+```bash
+uv run python scripts/evaluate_pipeline.py --config configs/default.toml
+```
+
+As máscaras de referência devem ser PNGs de canal único, nomeadas como:
+
+```text
+data/ground_truth/<nome_da_imagem>_instances.png
+```
+
+## Experimentos
+
+O runner de experimentos salva configuração, ambiente, métricas, predições e
+visualizações em `outputs/experiments/`:
+
+```bash
+uv run python scripts/run_experiment.py \
+  --config configs/experiments/yolo11_sam2_baseline.toml \
+  --experiment-name baseline \
+  --limit 3 \
+  --overwrite
+
 uv run python scripts/compare_experiments.py
 ```
 
-The default test suite skips real ONNX inference. Run it explicitly when local
-model files are available:
+Testes que carregam os modelos ONNX são opcionais:
 
 ```bash
 uv run pytest -m onnx
 ```
 
-The evaluation script intentionally requires single-channel PNG instance masks
-named `data/ground_truth/<stem>_instances.png`. JPEG masks introduce compression
-artifacts and invalidate exact metrics.
-
-## Visual Pipeline
-
-```mermaid
-flowchart LR
-    A[Top-down meal photo] --> B[Letterbox preprocessing]
-    B --> C[YOLOv11 ONNX detector]
-    C --> D[Food bounding boxes]
-    D --> E[SAM 2 ONNX encoder]
-    E --> F[SAM 2 ONNX decoder]
-    F --> G[Binary masks]
-    G --> H[YOLO TXT polygons]
-    H --> I[data/raw_segmentations]
-```
-
-## Repository Map
+## Estrutura do Repositório
 
 ```text
 src/
-  preprocessing.py    # letterbox + BGR/RGB normalization
-  detector.py         # YOLOv11 ONNX inference and decoding
-  segmenter.py        # SAM 2 encoder/decoder inference
-  annotations.py      # YOLO TXT writer
-  config.py           # typed TOML config loader
-  io_utils.py         # image loading, alpha/background handling, GT validation
-  postprocessing.py   # mask cleanup and overlap resolution
-  metrics.py          # rasterization, IoU/Dice/boundary/instance metrics
-  feature_extraction.py # per-instance color, texture, shape, position features
-  visualizer.py       # overlays and bounding boxes
-  pipeline.py         # image -> detector -> segmenter -> artifacts
+  preprocessing.py       # letterbox e normalização de entrada
+  detector.py            # inferência YOLO11 ONNX
+  segmenter.py           # encoder/decoder SAM 2 ONNX
+  pipeline.py            # orquestração imagem -> artefatos
+  postprocessing.py      # limpeza e resolução de sobreposições
+  metrics.py             # IoU, Dice e métricas por instância
+  feature_extraction.py  # atributos por instância segmentada
+  visualizer.py          # overlays de validação
 
 scripts/
-  run_pipeline.py       # run one image
-  import_labelstudio_brush.py # convert transient Label Studio exports to GT PNGs
-  evaluate_pipeline.py  # run dataset evaluation and overlays
-  extract_features.py   # export feature rows from generated instance masks
-  render_mask_previews.py # render color previews for mask PNGs
-  run_experiment.py     # reproducible experiment runner under outputs/
-  compare_experiments.py # benchmark saved experiment metrics
+  run_pipeline.py              # executa uma imagem
+  evaluate_pipeline.py         # avalia conjunto anotado
+  import_labelstudio_brush.py  # converte máscaras do Label Studio
+  extract_features.py          # exporta atributos para CSV
+  run_experiment.py            # salva execução reprodutível
+  compare_experiments.py       # compara resultados salvos
 
-tests/
-  test_preprocessing.py     # letterbox and normalization checks
-  test_phase3_outputs.py    # annotation, PNG mask, and metric checks
-  test_phase2_interfaces.py # optional ONNX integration smoke test
+configs/
+  default.toml
+  experiments/yolo11_sam2_baseline.toml
 
-data/
-  input/              # source meal photos
-  ground_truth/       # single-channel <stem>_instances.png masks
-  raw_segmentations/  # generated YOLO TXT polygons
-  masks/              # generated instance and class PNG masks
-  overlays/           # generated visual validation images
-  reports/            # per-image metadata and evaluation report
-
-models/
-  yolov11_food.onnx
-  sam2.1_hiera_tiny.encoder.onnx
-  sam2.1_hiera_tiny.decoder.onnx
+docs/
+  pipeline_overview.md
+  export_onnx.md
+  references.md
 ```
 
-Training and model-acquisition tools are opt-in dependency groups:
+## Documentação Complementar
 
-```bash
-uv sync --group models
-uv sync --group train
-```
-
-For a fuller visual explanation, see [docs/pipeline_overview.md](docs/pipeline_overview.md).
+- [Visão geral do pipeline](docs/pipeline_overview.md)
+- [Obtenção dos modelos ONNX](docs/export_onnx.md)
+- [Referências](docs/references.md)

@@ -1,44 +1,89 @@
-# Model Acquisition Guide
+# Obtenção dos Modelos ONNX
 
-Since local development runs on CPU, models must be in ONNX format before being placed in the `models/` directory.
+O pipeline executa inferência local em CPU usando ONNX Runtime. Por isso, os
+pesos devem estar em formato ONNX antes de serem colocados em `models/`.
 
-## 1. Exporting YOLOv11 (Detector)
-The YOLO detector is lightweight and can be exported directly. Run the following in a fresh Python environment or Colab:
+Arquivos esperados:
 
-\`\`\`python
-# Requires: pip install ultralytics
+```text
+models/yolov11_food.onnx
+models/sam2.1_hiera_tiny.encoder.onnx
+models/sam2.1_hiera_tiny.decoder.onnx
+```
+
+Os arquivos de modelo são grandes e não entram no Git.
+
+## YOLO11
+
+Para experimentos iniciais, um modelo YOLO11 pequeno é suficiente para validar
+o fluxo detector -> segmentador. A exportação pode ser feita em um ambiente com
+Ultralytics instalado:
+
+```bash
+uv sync --group train
+```
+
+```python
 from ultralytics import YOLO
 
-model = YOLO("yolo11n.pt") 
+model = YOLO("yolo11n.pt")
 path = model.export(format="onnx", opset=14, dynamic=False)
-print(f"Exported to: {path}")
-\`\`\`
-Rename the output to `yolov11_food.onnx` and move it to `models/`.
+print(path)
+```
 
-## 2. Acquiring SAM 2.1 (Segmenter)
-Exporting the SAM 2 architecture (Hiera) into ONNX is complex because it must be split into two separate models: the Image Encoder and the Prompt Decoder. We download the pre-exported ONNX weights directly from Hugging Face.
+Renomeie o arquivo exportado para:
 
-Install the model-acquisition dependency group first:
+```text
+models/yolov11_food.onnx
+```
 
-\`\`\`bash
+Em etapas posteriores, esse detector deve ser substituído ou ajustado com dados
+mais próximos do domínio alimentar estudado.
+
+## SAM 2.1
+
+O SAM 2 é usado em dois blocos ONNX: encoder de imagem e decoder de prompt.
+Essa divisão evita recomputar a representação da imagem para cada caixa
+detectada.
+
+Instale o grupo de dependências para aquisição de modelos:
+
+```bash
 uv sync --group models
-\`\`\`
+```
 
-\`\`\`python
-import os
+Exemplo de download de pesos ONNX pré-exportados:
+
+```python
 import shutil
+from pathlib import Path
+
 from huggingface_hub import hf_hub_download
 
 repo = "vietanhdev/segment-anything-2-onnx-models"
-os.makedirs("models", exist_ok=True)
+models_dir = Path("models")
+models_dir.mkdir(exist_ok=True)
 
-# Download Encoder
-enc_path = hf_hub_download(repo_id=repo, filename="sam2_hiera_tiny.encoder.onnx")
-shutil.copy(enc_path, "models/sam2.1_hiera_tiny.encoder.onnx")
+encoder = hf_hub_download(repo_id=repo, filename="sam2_hiera_tiny.encoder.onnx")
+decoder = hf_hub_download(repo_id=repo, filename="sam2_hiera_tiny.decoder.onnx")
 
-# Download Decoder
-dec_path = hf_hub_download(repo_id=repo, filename="sam2_hiera_tiny.decoder.onnx")
-shutil.copy(dec_path, "models/sam2.1_hiera_tiny.decoder.onnx")
+shutil.copy(encoder, models_dir / "sam2.1_hiera_tiny.encoder.onnx")
+shutil.copy(decoder, models_dir / "sam2.1_hiera_tiny.decoder.onnx")
+```
 
-print("SAM 2.1 ONNX weights downloaded to models/ directory.")
-\`\`\`
+## Verificação
+
+Depois de posicionar os arquivos em `models/`, rode:
+
+```bash
+uv run pytest -m onnx
+```
+
+Ou execute uma imagem de exemplo:
+
+```bash
+uv run python scripts/run_pipeline.py data/input/imagem1.jpg --confidence 0.05 --max-detections 3
+```
+
+Se a entrada ou saída esperada do modelo mudar, atualize também
+`configs/default.toml` e os testes de interface ONNX.
