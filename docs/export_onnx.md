@@ -18,7 +18,11 @@ Rename the output to `yolov11_food.onnx` and move it to `models/`.
 ## 2. Acquiring SAM 2.1 (Segmenter)
 Exporting the SAM 2 architecture (Hiera) into ONNX is complex because it must be split into two separate models: the Image Encoder and the Prompt Decoder. We download the pre-exported ONNX weights directly from Hugging Face.
 
-Ensure you have the library installed via your project manager (`uv add huggingface_hub`).
+Install the model-acquisition dependency group first:
+
+\`\`\`bash
+uv sync --group models
+\`\`\`
 
 \`\`\`python
 import os
@@ -36,5 +40,5 @@ shutil.copy(enc_path, "models/sam2.1_hiera_tiny.encoder.onnx")
 dec_path = hf_hub_download(repo_id=repo, filename="sam2_hiera_tiny.decoder.onnx")
 shutil.copy(dec_path, "models/sam2.1_hiera_tiny.decoder.onnx")
 
-print("SAM 2.1 ONNX weights successfully downloaded to models/ directory.")
+print("SAM 2.1 ONNX weights downloaded to models/ directory.")
 \`\`\`

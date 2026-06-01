@@ -17,12 +17,27 @@ evaluation against deterministic ground truth masks.
 
 ```bash
 uv sync
+uv run ruff format --check .
+uv run ruff check .
+uv run pytest
+
 uv run python scripts/run_pipeline.py data/input/imagem1.jpg --confidence 0.05 --max-detections 3
 uv run python scripts/import_labelstudio_brush.py \
   --brush-dir data/annotation_exports/labelstudio/brush_masks \
   --coco-json data/annotation_exports/labelstudio/result_coco.json
+uv run python scripts/import_labelstudio_brush.py --brush-dir data/png --task-id 4
 uv run python scripts/evaluate_pipeline.py --config configs/default.toml --confidence 0.05 --max-detections 3
 uv run python scripts/extract_features.py --config configs/default.toml
+uv run python scripts/render_mask_previews.py --mask-dir data/ground_truth --overlay
+uv run python scripts/run_experiment.py --config configs/experiments/yolo11_sam2_baseline.toml --experiment-name smoke --limit 3 --overwrite
+uv run python scripts/compare_experiments.py
+```
+
+The default test suite skips real ONNX inference. Run it explicitly when local
+model files are available:
+
+```bash
+uv run pytest -m onnx
 ```
 
 The evaluation script intentionally requires single-channel PNG instance masks
@@ -64,6 +79,14 @@ scripts/
   import_labelstudio_brush.py # convert transient Label Studio exports to GT PNGs
   evaluate_pipeline.py  # run dataset evaluation and overlays
   extract_features.py   # export feature rows from generated instance masks
+  render_mask_previews.py # render color previews for mask PNGs
+  run_experiment.py     # reproducible experiment runner under outputs/
+  compare_experiments.py # benchmark saved experiment metrics
+
+tests/
+  test_preprocessing.py     # letterbox and normalization checks
+  test_phase3_outputs.py    # annotation, PNG mask, and metric checks
+  test_phase2_interfaces.py # optional ONNX integration smoke test
 
 data/
   input/              # source meal photos
@@ -77,6 +100,13 @@ models/
   yolov11_food.onnx
   sam2.1_hiera_tiny.encoder.onnx
   sam2.1_hiera_tiny.decoder.onnx
+```
+
+Training and model-acquisition tools are opt-in dependency groups:
+
+```bash
+uv sync --group models
+uv sync --group train
 ```
 
 For a fuller visual explanation, see [docs/pipeline_overview.md](docs/pipeline_overview.md).

@@ -1,19 +1,16 @@
-"""Smoke test real Phase 2 ONNX sessions and one pipeline invocation."""
-
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
+import pytest
 
 from src.detector import YoloOnnxDetector
 from src.pipeline import FoodSegmentationPipeline
 from src.segmenter import SamOnnxSegmenter
 
 
-def main() -> None:
+@pytest.mark.onnx
+def test_real_onnx_pipeline_writes_outputs(tmp_path) -> None:
     image_path = _first_input_image()
     detector = YoloOnnxDetector(
         "models/yolov11_food.onnx",
@@ -24,17 +21,22 @@ def main() -> None:
         "models/sam2.1_hiera_tiny.encoder.onnx",
         "models/sam2.1_hiera_tiny.decoder.onnx",
     )
-    pipeline = FoodSegmentationPipeline(detector, segmenter)
+    pipeline = FoodSegmentationPipeline(
+        detector,
+        segmenter,
+        output_dir=tmp_path / "raw_segmentations",
+        mask_dir=tmp_path / "masks",
+        overlay_dir=tmp_path / "overlays",
+        report_dir=tmp_path / "reports",
+    )
+
     result = pipeline.run_image(image_path)
 
-    if not result.annotation_path.exists():
-        raise AssertionError(f"annotation file was not written: {result.annotation_path}")
-
-    print(
-        f"phase 2 inference smoke test passed "
-        f"image={image_path.name} detections={len(result.detections)} "
-        f"segmentations={len(result.segmentations)} output={result.annotation_path}"
-    )
+    assert result.annotation_path.exists()
+    assert result.instance_mask_path.exists()
+    assert result.class_mask_path.exists()
+    assert result.metadata_path.exists()
+    assert result.overlay_path.exists()
 
 
 def _first_input_image() -> Path:
@@ -44,7 +46,3 @@ def _first_input_image() -> Path:
         if matches:
             return matches[0]
     raise FileNotFoundError("no test image found in data/input")
-
-
-if __name__ == "__main__":
-    main()

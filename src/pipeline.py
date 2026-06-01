@@ -46,7 +46,7 @@ class FoodSegmentationPipeline:
         self.remove_components_px = remove_components_px
 
     @classmethod
-    def from_config(cls, config: PipelineConfig) -> "FoodSegmentationPipeline":
+    def from_config(cls, config: PipelineConfig) -> FoodSegmentationPipeline:
         """Build the ONNX pipeline from typed config."""
 
         detector = YoloOnnxDetector(

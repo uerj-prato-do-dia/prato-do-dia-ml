@@ -7,7 +7,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 SUPPORTED_IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".heic")
 
 

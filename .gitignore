@@ -1,26 +1,52 @@
+# Python environments and caches
 .venv/
 __pycache__/
 *.py[cod]
 .ruff_cache/
 .pytest_cache/
+.mypy_cache/
+.pyright/
 
+# Local preprocessing smoke artifacts
 data/test_*_input.png
 data/test_*_output.png
+
+# Transient annotation exports and conversions
 data/annotation_exports/
 data/labelstudio-to-png/
 data/labelstudio-to-coco/
 data/labelstudio-to-numpy/
 data/label-to-numpy/
+data/png/
+data/numpy/
+data/npy/
+data/coco/
+data/UECFOODPIXCOMPLETE/
+
+# Generated pipeline outputs
 data/raw_segmentations/*.txt
 !data/raw_segmentations/.gitkeep
 data/overlays/*.jpg
 data/overlays/*.png
 data/masks/*.png
+data/mask_previews/*.png
 data/reports/*.json
 data/reports/*.csv
 data/features/*.csv
 data/features/*.parquet
 data/evaluation_report.json
 
+# External datasets must stay outside version control
+datasets_external/
+
+# Experiment and training outputs
+outputs/
+runs/
+experiments/uecfoodpixcomplete/converted_*/
+experiments/uecfoodpixcomplete/outputs/
+experiments/uecfoodpixcomplete/**/*.pt
+
+# Local model binaries
 models/*.onnx
 models/*.pt
+*.pt

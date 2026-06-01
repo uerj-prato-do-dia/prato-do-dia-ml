@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
 import cv2
+import numpy as np
 
 from src.annotations import mask_to_polygon
 from src.onnx_runtime import create_cpu_session

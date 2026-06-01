@@ -1,11 +1,10 @@
 [project]
-name = "prato-do-dia-improved"
+name = "prato-do-dia-yolo-sam"
 version = "0.2.0"
 description = "YOLO11 and SAM 2 food segmentation pipeline for Prato do Dia."
-readme = "AGENTS.md"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "huggingface-hub>=1.14.0",
     "numpy>=2.0.0",
     "onnxruntime>=1.18.0",
     "opencv-python>=4.10.0",
@@ -16,3 +15,47 @@ dependencies = [
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.0",
+    "pytest>=9.0.3",
+    "ruff>=0.15.15",
+]
+models = [
+    "huggingface-hub>=1.17.0",
+]
+train = [
+    "ultralytics>=8.4.60",
+]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not onnx'"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "onnx: tests that require local ONNX model files and run real inference",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = [
+    ".venv",
+    "data/UECFOODPIXCOMPLETE",
+    "datasets_external",
+    "outputs",
+    "runs",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = [
+    "E501",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = ["E402"]

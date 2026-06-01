@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 BBoxXYXY = tuple[float, float, float, float]
 Point = tuple[float, float]
 
@@ -36,7 +35,7 @@ class SegmentationMask:
     sam_iou_prediction: float = 0.0
     area_px: int = 0
 
-    def with_updates(self, **changes: object) -> "SegmentationMask":
+    def with_updates(self, **changes: object) -> SegmentationMask:
         """Return a copy with selected fields replaced."""
 
         return replace(self, **changes)
