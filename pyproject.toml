@@ -5,53 +5,50 @@ description = "YOLO11 and SAM 2 food segmentation pipeline for Prato do Dia."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "numpy>=2.0.0",
-    "onnxruntime>=1.18.0",
-    "opencv-python>=4.10.0",
-    "pandas>=3.0.3",
-    "scikit-image>=0.26.0",
-    "scipy>=1.17.1",
+  "numpy>=2.0.0",
+  "onnxruntime>=1.18.0",
+  "opencv-python>=4.10.0",
+  "pandas>=3.0.3",
+  "scikit-image>=0.26.0",
+  "scipy>=1.17.1",
 ]
-
-[tool.uv]
-package = false
 
 [dependency-groups]
 dev = [
-    "pre-commit>=4.6.0",
-    "pytest>=9.0.3",
-    "ruff>=0.15.15",
+  "pre-commit>=4.6.0",
+  "pytest>=9.0.3",
+  "ruff>=0.15.15",
 ]
 models = [
-    "huggingface-hub>=1.17.0",
+  "huggingface-hub>=1.17.0",
 ]
 train = [
-    "ultralytics>=8.4.60",
+  "ultralytics>=8.4.60",
 ]
 
 [tool.pytest.ini_options]
 addopts = "-m 'not onnx'"
+markers = [
+  "onnx: tests that require local ONNX model files and run real inference",
+]
 pythonpath = ["."]
 testpaths = ["tests"]
-markers = [
-    "onnx: tests that require local ONNX model files and run real inference",
-]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 120
 exclude = [
-    ".venv",
-    "data/UECFOODPIXCOMPLETE",
-    "datasets_external",
-    "outputs",
-    "runs",
+  ".venv",
+  "data/UECFOODPIXCOMPLETE",
+  "datasets_external",
+  "outputs",
+  "runs",
 ]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = [
-    "E501",
+  "E501",
 ]
 
 [tool.ruff.lint.isort]
@@ -59,3 +56,6 @@ known-first-party = ["src"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = ["E402"]
+
+[tool.uv]
+package = false

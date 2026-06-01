@@ -8,5 +8,29 @@
       "source.fixAll.ruff": "explicit",
       "source.organizeImports.ruff": "explicit"
     }
-  }
+  },
+  "files.exclude": {
+    "/.venv": true,
+    "/pycache": true,
+    "/.pytest_cache": true,
+    "/.ruff_cache": true,
+    "/.mypy_cache": true
+  },
+  "search.exclude": {
+    "/.venv": true,
+    "/pycache": true,
+    "/.pytest_cache": true,
+    "/.ruff_cache": true,
+    "/.mypy_cache": true
+  },
+  "python.analysis.exclude": [
+    "/.venv",
+    "/pycache",
+    "/.pytest_cache",
+    "/.ruff_cache",
+    "/.mypy_cache",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*"
+  ]
 }
