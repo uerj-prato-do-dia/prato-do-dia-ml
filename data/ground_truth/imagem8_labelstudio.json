@@ -8,49 +8,56 @@
       "instance_id": 1,
       "class_id": 3,
       "label": "beans",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-beans-0.png",
+      "source": "data/png/task-8-annotation-8-by-1-label-beans-0.png",
       "area_px": 21280
     },
     {
       "instance_id": 2,
-      "class_id": 9,
+      "class_id": 10,
       "label": "egg",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-egg-0.png",
-      "area_px": 19437
+      "source": "data/png/task-8-annotation-8-by-1-label-egg-0.png",
+      "area_px": 19438
     },
     {
       "instance_id": 3,
       "class_id": 2,
       "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-leafy_greens-0.png",
+      "source": "data/png/task-8-annotation-8-by-1-label-leafy_greens-0.png",
       "area_px": 12517
     },
     {
       "instance_id": 4,
       "class_id": 2,
       "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-leafy_greens-1.png",
+      "source": "data/png/task-8-annotation-8-by-1-label-leafy_greens-1.png",
       "area_px": 2295
     },
     {
       "instance_id": 5,
-      "class_id": 10,
+      "class_id": 11,
       "label": "other_food",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-other_food-0.png",
+      "source": "data/png/task-8-annotation-8-by-1-label-other_food-0.png",
       "area_px": 11750
     },
     {
       "instance_id": 6,
-      "class_id": 5,
-      "label": "rice",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-rice-0.png",
-      "area_px": 10467
+      "class_id": 16,
+      "label": "pork",
+      "source": "data/png/task-8-annotation-8-by-1-label-pork-0.png",
+      "area_px": 33301
     },
     {
       "instance_id": 7,
+      "class_id": 5,
+      "label": "rice",
+      "source": "data/png/task-8-annotation-8-by-1-label-rice-0.png",
+      "area_px": 10472
+    },
+    {
+      "instance_id": 8,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-8-annotation-8-by-1-label-tomato-0.png",
+      "source": "data/png/task-8-annotation-8-by-1-label-tomato-0.png",
       "area_px": 1279
     }
   ]

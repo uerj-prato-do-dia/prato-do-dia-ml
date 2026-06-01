@@ -8,21 +8,21 @@
       "instance_id": 1,
       "class_id": 5,
       "label": "rice",
-      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-rice-0.png",
+      "source": "data/png/task-7-annotation-2-by-1-label-rice-0.png",
       "area_px": 174868
     },
     {
       "instance_id": 2,
-      "class_id": 13,
+      "class_id": 14,
       "label": "shoestring_potatoes",
-      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-shoestring_potatoes-0.png",
+      "source": "data/png/task-7-annotation-2-by-1-label-shoestring_potatoes-0.png",
       "area_px": 138049
     },
     {
       "instance_id": 3,
-      "class_id": 14,
+      "class_id": 15,
       "label": "stroganoff",
-      "source": "data/labelstudio-to-png/task-7-annotation-2-by-1-label-stroganoff-0.png",
+      "source": "data/png/task-7-annotation-2-by-1-label-stroganoff-0.png",
       "area_px": 156198
     }
   ]

@@ -8,28 +8,35 @@
       "instance_id": 1,
       "class_id": 3,
       "label": "beans",
-      "source": "data/labelstudio-to-png/task-3-annotation-1-by-1-label-beans-0.png",
+      "source": "data/png/task-3-annotation-1-by-1-label-beans-0.png",
       "area_px": 10635
     },
     {
       "instance_id": 2,
-      "class_id": 6,
-      "label": "ground_beef",
-      "source": "data/labelstudio-to-png/task-3-annotation-1-by-1-label-ground_beef-0.png",
-      "area_px": 10929
+      "class_id": 9,
+      "label": "carrot",
+      "source": "data/png/task-3-annotation-1-by-1-label-carrot-0.png",
+      "area_px": 8747
     },
     {
       "instance_id": 3,
-      "class_id": 2,
-      "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-3-annotation-1-by-1-label-leafy_greens-0.png",
-      "area_px": 11223
+      "class_id": 6,
+      "label": "ground_beef",
+      "source": "data/png/task-3-annotation-1-by-1-label-ground_beef-0.png",
+      "area_px": 10929
     },
     {
       "instance_id": 4,
+      "class_id": 2,
+      "label": "leafy_greens",
+      "source": "data/png/task-3-annotation-1-by-1-label-leafy_greens-0.png",
+      "area_px": 11223
+    },
+    {
+      "instance_id": 5,
       "class_id": 5,
       "label": "rice",
-      "source": "data/labelstudio-to-png/task-3-annotation-1-by-1-label-rice-0.png",
+      "source": "data/png/task-3-annotation-1-by-1-label-rice-0.png",
       "area_px": 12854
     }
   ]

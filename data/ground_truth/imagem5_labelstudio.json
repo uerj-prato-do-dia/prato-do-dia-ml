@@ -8,63 +8,63 @@
       "instance_id": 1,
       "class_id": 3,
       "label": "beans",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-beans-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-beans-0.png",
       "area_px": 26769
     },
     {
       "instance_id": 2,
-      "class_id": 11,
+      "class_id": 12,
       "label": "chicken",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-chicken-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-chicken-0.png",
       "area_px": 33850
     },
     {
       "instance_id": 3,
-      "class_id": 9,
+      "class_id": 10,
       "label": "egg",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-egg-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-egg-0.png",
       "area_px": 12380
     },
     {
       "instance_id": 4,
       "class_id": 2,
       "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-leafy_greens-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-leafy_greens-0.png",
       "area_px": 29388
     },
     {
       "instance_id": 5,
-      "class_id": 12,
+      "class_id": 13,
       "label": "olive",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-olive-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-olive-0.png",
       "area_px": 2348
     },
     {
       "instance_id": 6,
       "class_id": 5,
       "label": "rice",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-rice-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-rice-0.png",
       "area_px": 23058
     },
     {
       "instance_id": 7,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-tomato-0.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-tomato-0.png",
       "area_px": 1421
     },
     {
       "instance_id": 8,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-tomato-1.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-tomato-1.png",
       "area_px": 1288
     },
     {
       "instance_id": 9,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-5-annotation-5-by-1-label-tomato-2.png",
+      "source": "data/png/task-5-annotation-5-by-1-label-tomato-2.png",
       "area_px": 1617
     }
   ]

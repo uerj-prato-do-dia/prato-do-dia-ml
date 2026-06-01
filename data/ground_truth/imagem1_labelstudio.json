@@ -8,56 +8,56 @@
       "instance_id": 1,
       "class_id": 3,
       "label": "beans",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-beans-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-beans-0.png",
       "area_px": 8399
     },
     {
       "instance_id": 2,
       "class_id": 4,
       "label": "french_fries",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-french_fries-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-french_fries-0.png",
       "area_px": 9497
     },
     {
       "instance_id": 3,
       "class_id": 6,
       "label": "ground_beef",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-ground_beef-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-ground_beef-0.png",
       "area_px": 13328
     },
     {
       "instance_id": 4,
       "class_id": 2,
       "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-leafy_greens-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-leafy_greens-0.png",
       "area_px": 8733
     },
     {
       "instance_id": 5,
       "class_id": 2,
       "label": "leafy_greens",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-leafy_greens-1.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-leafy_greens-1.png",
       "area_px": 765
     },
     {
       "instance_id": 6,
       "class_id": 5,
       "label": "rice",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-rice-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-rice-0.png",
       "area_px": 6544
     },
     {
       "instance_id": 7,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-tomato-0.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-tomato-0.png",
       "area_px": 414
     },
     {
       "instance_id": 8,
       "class_id": 1,
       "label": "tomato",
-      "source": "data/labelstudio-to-png/task-1-annotation-6-by-1-label-tomato-1.png",
+      "source": "data/png/task-1-annotation-6-by-1-label-tomato-1.png",
       "area_px": 4560
     }
   ]

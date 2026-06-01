@@ -17,9 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.io_utils import input_images
 
-MASK_NAME_RE = re.compile(
-    r"task-(?P<task>\d+)-annotation-\d+-by-\d+-label-(?P<label>.+)-(?P<index>\d+)\.png$"
-)
+MASK_NAME_RE = re.compile(r"task-(?P<task>\d+)-annotation-\d+-by-\d+-label-(?P<label>.+)-(?P<index>\d+)\.png$")
 
 
 def main() -> None:
@@ -31,16 +29,22 @@ def main() -> None:
         type=Path,
         default=Path("data/annotation_exports/labelstudio/result_coco.json"),
     )
+    parser.add_argument("--class-map", type=Path, default=Path("data/ground_truth/class_map.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("data/ground_truth"))
+    parser.add_argument("--task-id", type=int)
     parser.add_argument("--threshold", type=int, default=1)
     args = parser.parse_args()
 
     if args.threshold < 1 or args.threshold > 255:
         raise ValueError("--threshold must be in [1, 255]")
 
-    class_name_to_id = _load_class_mapping(args.coco_json)
+    class_name_to_id = _load_class_mapping(args.coco_json, args.class_map)
     task_to_image = _task_to_image_paths(args.input_dir)
     task_masks = _group_masks_by_task(args.brush_dir)
+    if args.task_id is not None:
+        task_masks = {task_id: masks for task_id, masks in task_masks.items() if task_id == args.task_id}
+        if not task_masks:
+            raise FileNotFoundError(f"no brush masks found for task {args.task_id} in {args.brush_dir}")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     imported: list[dict[str, object]] = []
@@ -115,9 +119,16 @@ class MaskInfo:
         self.index = index
 
 
-def _load_class_mapping(coco_json: Path) -> dict[str, int]:
+def _load_class_mapping(coco_json: Path, class_map: Path) -> dict[str, int]:
+    mapping: dict[str, int] = {}
+    if class_map.exists():
+        mapping.update({str(name): int(class_id) for name, class_id in json.loads(class_map.read_text()).items()})
+    if not coco_json.exists():
+        if mapping:
+            return mapping
+        raise FileNotFoundError(f"missing class map and COCO categories: {class_map}, {coco_json}")
     data = json.loads(coco_json.read_text(encoding="utf-8"))
-    mapping = {str(category["name"]): int(category["id"]) for category in data.get("categories", [])}
+    mapping.update({str(category["name"]): int(category["id"]) for category in data.get("categories", [])})
     if not mapping:
         raise ValueError(f"no categories found in {coco_json}")
     return mapping
@@ -150,7 +161,7 @@ def _group_masks_by_task(brush_dir: Path) -> dict[int, list[MaskInfo]]:
             )
         )
 
-    for task_id, masks in grouped.items():
+    for masks in grouped.values():
         masks.sort(key=lambda item: (item.label, item.index, item.path.name))
     return dict(grouped)
 
