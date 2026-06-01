@@ -50,3 +50,6 @@ experiments/uecfoodpixcomplete/**/*.pt
 models/*.onnx
 models/*.pt
 *.pt
+
+.agents/
+.codex/
