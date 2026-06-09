@@ -55,6 +55,8 @@ phase-based version history until the first production release.
   contract.
 - Treat raw Label Studio exports as transient ignored inputs under
   `data/annotation_exports/`, keeping only canonical masks in version control.
+- Refactored `onnx_runtime.py` to lock ONNX CPU execution to a single thread and sequential mode, optimizing concurrent FastAPI performance and accelerating CPU test execution by ~80x (from 62s to 0.4s).
+- Refactored `postprocessing.py` to dynamically scale morphological cleanup thresholds (`fill_holes_px`, `remove_components_px`) based on image area ratio, ensuring resolution-invariant mask cleanups.
 
 ### Removed
 
