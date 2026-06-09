@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from src.detector import YoloOnnxDetector
-from src.pipeline import FoodSegmentationPipeline
-from src.segmenter import SamOnnxSegmenter
+from prato_do_dia_ml.detector import YoloOnnxDetector
+from prato_do_dia_ml.pipeline import FoodSegmentationPipeline
+from prato_do_dia_ml.segmenter import SamOnnxSegmenter
 
 
 @pytest.mark.onnx

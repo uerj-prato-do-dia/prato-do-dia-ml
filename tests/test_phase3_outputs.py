@@ -3,11 +3,11 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
-from src.annotations import write_yolo_segmentation_txt
-from src.io_utils import validate_instance_mask_png
-from src.metrics import dice_score, evaluate_instance_masks, intersection_over_union, rasterize_yolo_polygons
-from src.postprocessing import resolve_overlaps
-from src.schema import SegmentationMask
+from prato_do_dia_ml.annotations import write_yolo_segmentation_txt
+from prato_do_dia_ml.io_utils import validate_instance_mask_png
+from prato_do_dia_ml.metrics import dice_score, evaluate_instance_masks, intersection_over_union, rasterize_yolo_polygons
+from prato_do_dia_ml.postprocessing import resolve_overlaps
+from prato_do_dia_ml.schema import SegmentationMask
 
 
 def test_yolo_rasterization_fills_polygon(tmp_path) -> None:

@@ -7,7 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.schema import Detection
+from prato_do_dia_ml.schema import Detection
 
 GT_COLOR = (0, 255, 0)
 PRED_COLOR = (0, 0, 255)

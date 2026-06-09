@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from src.experiment import compare_experiments
+from prato_do_dia_ml.experiment import compare_experiments
 
 
 def test_compare_experiments_reads_metrics(tmp_path) -> None:

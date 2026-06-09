@@ -15,7 +15,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.io_utils import input_images
+from prato_do_dia_ml.io_utils import input_images
 
 MASK_NAME_RE = re.compile(r"task-(?P<task>\d+)-annotation-\d+-by-\d+-label-(?P<label>.+)-(?P<index>\d+)\.png$")
 

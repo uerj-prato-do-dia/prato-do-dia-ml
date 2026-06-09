@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.preprocessing import letterbox_image, normalize_bgr_to_rgb
+from prato_do_dia_ml.preprocessing import letterbox_image, normalize_bgr_to_rgb
 
 
 def test_letterbox_preserves_aspect_ratio() -> None:
