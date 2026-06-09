@@ -18,7 +18,13 @@ from prato_do_dia_ml.experiment_visuals import render_debug_overlay
 from prato_do_dia_ml.io_utils import input_images, validate_instance_mask_png
 from prato_do_dia_ml.metrics import evaluate_instance_masks, intersection_over_union
 from prato_do_dia_ml.pipeline import FoodSegmentationPipeline
-from prato_do_dia_ml.reproducibility import config_to_dict, set_random_seed, write_environment, write_model_versions, write_yaml
+from prato_do_dia_ml.reproducibility import (
+    config_to_dict,
+    set_random_seed,
+    write_environment,
+    write_model_versions,
+    write_yaml,
+)
 
 
 def run_experiment(

@@ -5,7 +5,12 @@ import numpy as np
 
 from prato_do_dia_ml.annotations import write_yolo_segmentation_txt
 from prato_do_dia_ml.io_utils import validate_instance_mask_png
-from prato_do_dia_ml.metrics import dice_score, evaluate_instance_masks, intersection_over_union, rasterize_yolo_polygons
+from prato_do_dia_ml.metrics import (
+    dice_score,
+    evaluate_instance_masks,
+    intersection_over_union,
+    rasterize_yolo_polygons,
+)
 from prato_do_dia_ml.postprocessing import resolve_overlaps
 from prato_do_dia_ml.schema import SegmentationMask
 
