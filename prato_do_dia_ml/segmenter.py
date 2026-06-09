@@ -7,10 +7,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.annotations import mask_to_polygon
-from src.onnx_runtime import create_cpu_session
-from src.preprocessing import LetterboxResult, letterbox_image, normalize_bgr_to_rgb
-from src.schema import Detection, SegmentationMask
+from prato_do_dia_ml.annotations import mask_to_polygon
+from prato_do_dia_ml.onnx_runtime import create_cpu_session
+from prato_do_dia_ml.preprocessing import LetterboxResult, letterbox_image, normalize_bgr_to_rgb
+from prato_do_dia_ml.schema import Detection, SegmentationMask
 
 SAM_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 SAM_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)

@@ -8,7 +8,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.schema import SegmentationMask
+from prato_do_dia_ml.schema import SegmentationMask
 
 
 def write_yolo_segmentation_txt(

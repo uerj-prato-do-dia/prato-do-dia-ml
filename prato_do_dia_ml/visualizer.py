@@ -7,7 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.metrics import parse_yolo_polygon_line
+from prato_do_dia_ml.metrics import parse_yolo_polygon_line
 
 OVERLAY_COLORS_BGR = (
     (0, 0, 255),

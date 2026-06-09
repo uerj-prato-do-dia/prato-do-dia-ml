@@ -9,8 +9,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.config import load_config
-from src.experiment import run_experiment
+from prato_do_dia_ml.config import load_config
+from prato_do_dia_ml.experiment import run_experiment
 
 
 def main() -> None:

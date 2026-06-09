@@ -6,14 +6,14 @@ from pathlib import Path
 
 import cv2
 
-from src.annotations import write_mask_png, write_metadata_json, write_yolo_segmentation_txt
-from src.config import PipelineConfig
-from src.detector import YoloOnnxDetector
-from src.io_utils import load_image_bgr
-from src.postprocessing import mask_to_class_image, mask_to_instance_image, postprocess_segmentations
-from src.schema import PipelineResult
-from src.segmenter import SamOnnxSegmenter
-from src.visualizer import overlay_yolo_polygons
+from prato_do_dia_ml.annotations import write_mask_png, write_metadata_json, write_yolo_segmentation_txt
+from prato_do_dia_ml.config import PipelineConfig
+from prato_do_dia_ml.detector import YoloOnnxDetector
+from prato_do_dia_ml.io_utils import load_image_bgr
+from prato_do_dia_ml.postprocessing import mask_to_class_image, mask_to_instance_image, postprocess_segmentations
+from prato_do_dia_ml.schema import PipelineResult
+from prato_do_dia_ml.segmenter import SamOnnxSegmenter
+from prato_do_dia_ml.visualizer import overlay_yolo_polygons
 
 
 class FoodSegmentationPipeline:

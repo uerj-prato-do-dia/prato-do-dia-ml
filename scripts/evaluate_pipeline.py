@@ -13,14 +13,14 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.config import load_config
-from src.io_utils import input_images, validate_instance_mask_png
-from src.metrics import (
+from prato_do_dia_ml.config import load_config
+from prato_do_dia_ml.io_utils import input_images, validate_instance_mask_png
+from prato_do_dia_ml.metrics import (
     evaluate_instance_masks,
     intersection_over_union,
     rasterize_yolo_polygons,
 )
-from src.pipeline import FoodSegmentationPipeline
+from prato_do_dia_ml.pipeline import FoodSegmentationPipeline
 
 
 def main() -> None:

@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from src.config import PipelineConfig
+from prato_do_dia_ml.config import PipelineConfig
 
 TRACKED_PACKAGES = (
     "numpy",

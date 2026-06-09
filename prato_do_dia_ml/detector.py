@@ -7,9 +7,9 @@ from pathlib import Path
 import numpy as np
 import onnxruntime as ort
 
-from src.onnx_runtime import create_cpu_session
-from src.preprocessing import LetterboxResult, letterbox_image, normalize_bgr_to_rgb
-from src.schema import Detection
+from prato_do_dia_ml.onnx_runtime import create_cpu_session
+from prato_do_dia_ml.preprocessing import LetterboxResult, letterbox_image, normalize_bgr_to_rgb
+from prato_do_dia_ml.schema import Detection
 
 
 class YoloOnnxDetector:

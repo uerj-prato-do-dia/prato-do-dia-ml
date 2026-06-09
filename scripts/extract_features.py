@@ -11,9 +11,9 @@ import cv2
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.config import load_config
-from src.feature_extraction import extract_instance_features, save_features_csv
-from src.io_utils import input_images
+from prato_do_dia_ml.config import load_config
+from prato_do_dia_ml.feature_extraction import extract_instance_features, save_features_csv
+from prato_do_dia_ml.io_utils import input_images
 
 
 def main() -> None:

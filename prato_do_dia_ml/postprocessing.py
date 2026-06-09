@@ -6,8 +6,8 @@ import cv2
 import numpy as np
 from scipy import ndimage
 
-from src.annotations import mask_to_polygon
-from src.schema import SegmentationMask
+from prato_do_dia_ml.annotations import mask_to_polygon
+from prato_do_dia_ml.schema import SegmentationMask
 
 
 def postprocess_segmentations(
