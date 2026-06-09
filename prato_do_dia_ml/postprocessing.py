@@ -23,6 +23,10 @@ def postprocess_segmentations(
         return ()
 
     height, width = image_shape
+    scale_factor = (height * width) / (640.0 * 640.0)
+    scaled_fill_holes = max(0, int(round(fill_holes_px * scale_factor)))
+    scaled_remove_components = max(0, int(round(remove_components_px * scale_factor)))
+
     min_area_px = max(1, int(round(height * width * min_mask_area_ratio)))
     cleaned: list[SegmentationMask] = []
     for segmentation in segmentations:
@@ -30,8 +34,8 @@ def postprocess_segmentations(
             continue
         mask = cleanup_mask(
             segmentation.mask,
-            min_component_px=max(min_area_px, remove_components_px),
-            fill_holes_px=fill_holes_px,
+            min_component_px=max(min_area_px, scaled_remove_components),
+            fill_holes_px=scaled_fill_holes,
         )
         area_px = int(mask.sum())
         if area_px < min_area_px:
