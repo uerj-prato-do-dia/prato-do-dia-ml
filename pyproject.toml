@@ -26,14 +26,6 @@ train = [
   "ultralytics>=8.4.60",
 ]
 
-[tool.pytest.ini_options]
-addopts = "-m 'not onnx'"
-markers = [
-  "onnx: tests that require local ONNX model files and run real inference",
-]
-pythonpath = ["."]
-testpaths = ["tests"]
-
 [tool.ruff]
 target-version = "py311"
 line-length = 120
@@ -66,3 +58,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["prato_do_dia_ml"]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not onnx'"
+markers = [
+  "onnx: tests that require local ONNX model files and run real inference",
+]
+pythonpath = ["."]
+testpaths = ["tests"]
