@@ -20,6 +20,12 @@ Run the image quality audit:
 uv run python scripts/audit_dataset_images.py
 ```
 
+Run the ground-truth audit:
+
+```bash
+uv run python scripts/audit_ground_truth.py
+```
+
 Run a quick baseline subset:
 
 ```bash
@@ -57,6 +63,29 @@ outputs/experiments/baseline_v1/
 
 The runner also writes intermediate masks, raw segmentations, and per-image
 metadata under the same output directory so it does not pollute `data/`.
+
+## Ground-truth audit
+
+`scripts/audit_ground_truth.py` checks whether evaluation masks are usable before
+running or interpreting metrics. It verifies mask existence, image/mask dimension
+alignment, foreground area, instance count, and suspicious tiny regions.
+
+Output:
+
+```text
+outputs/dataset_audit/ground_truth_quality.csv
+```
+
+Important flags:
+
+- `missing_mask`: manifest points to a mask that does not exist.
+- `empty_mask`: mask contains no foreground.
+- `dimension_mismatch`: image and mask sizes differ.
+- `single_instance_only`: only one foreground instance ID exists.
+- `very_small_foreground`: foreground area is suspiciously small.
+- `very_large_foreground`: foreground area is suspiciously large.
+- `too_many_tiny_instances`: many very small instance IDs may indicate noisy
+  annotation.
 
 ## Metrics
 

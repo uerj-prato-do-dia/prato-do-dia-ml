@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from scripts.audit_dataset_images import AuditThresholds, audit_manifest
+from scripts.audit_ground_truth import audit_ground_truth
 from scripts.create_dataset_manifest import build_manifest, write_manifest
 
 
@@ -108,14 +109,80 @@ def test_audit_manifest_flags_small_dark_low_contrast_and_missing_mask(tmp_path:
     assert "missing_mask" in flags
 
 
+def test_ground_truth_audit_valid_mask_returns_ok(tmp_path: Path) -> None:
+    image_path = tmp_path / "image.jpg"
+    mask_path = tmp_path / "mask.png"
+    manifest_path = tmp_path / "manifest.csv"
+    _write_image(image_path, size=(100, 100), value=180)
+    _write_mask(mask_path, size=(100, 100), instance_count=2)
+    _write_manifest(manifest_path, image_path=image_path, mask_path=mask_path)
+
+    rows = audit_ground_truth(manifest_path)
+
+    assert rows[0]["dimension_match"] == "true"
+    assert rows[0]["instance_count"] == "2"
+    assert rows[0]["flags"] == "ok"
+
+
+def test_ground_truth_audit_flags_missing_empty_dimension_and_single_instance(tmp_path: Path) -> None:
+    image_path = tmp_path / "image.jpg"
+    empty_mask_path = tmp_path / "empty.png"
+    small_mask_path = tmp_path / "small.png"
+    missing_mask_path = tmp_path / "missing.png"
+    manifest_path = tmp_path / "manifest.csv"
+    _write_image(image_path, size=(100, 100), value=180)
+    _write_empty_mask(empty_mask_path, size=(100, 100))
+    _write_mask(small_mask_path, size=(50, 50), instance_count=1)
+    _write_manifest_rows(
+        manifest_path,
+        [
+            ("missing", image_path, missing_mask_path),
+            ("empty", image_path, empty_mask_path),
+            ("mismatch", image_path, small_mask_path),
+        ],
+    )
+
+    rows = {row["image_id"]: row for row in audit_ground_truth(manifest_path)}
+
+    assert "missing_mask" in rows["missing"]["flags"].split(";")
+    assert "empty_mask" in rows["empty"]["flags"].split(";")
+    assert "dimension_mismatch" in rows["mismatch"]["flags"].split(";")
+    assert "single_instance_only" in rows["mismatch"]["flags"].split(";")
+
+
 def _write_image(path: Path, *, size: tuple[int, int], value: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     image = np.full((size[1], size[0], 3), value, dtype=np.uint8)
     assert cv2.imwrite(str(path), image)
 
 
-def _write_mask(path: Path, *, size: tuple[int, int]) -> None:
+def _write_mask(path: Path, *, size: tuple[int, int], instance_count: int = 1) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     mask = np.zeros((size[1], size[0]), dtype=np.uint8)
-    mask[10:20, 10:20] = 1
+    for index in range(instance_count):
+        start = 10 + index * 20
+        mask[start : start + 10, start : start + 10] = index + 1
     assert cv2.imwrite(str(path), mask)
+
+
+def _write_empty_mask(path: Path, *, size: tuple[int, int]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mask = np.zeros((size[1], size[0]), dtype=np.uint8)
+    assert cv2.imwrite(str(path), mask)
+
+
+def _write_manifest(manifest_path: Path, *, image_path: Path, mask_path: Path) -> None:
+    _write_manifest_rows(manifest_path, [("image", image_path, mask_path)])
+
+
+def _write_manifest_rows(manifest_path: Path, rows: list[tuple[str, Path, Path]]) -> None:
+    manifest_path.write_text(
+        "\n".join(
+            ["image_id,image_path,mask_path,source,split,foods,plate_type,lighting,angle,quality,notes"]
+            + [
+                f"{image_id},{image_path},{mask_path},own,baseline_eval,unknown,unknown,unknown,unknown,unknown,test"
+                for image_id, image_path, mask_path in rows
+            ]
+        ),
+        encoding="utf-8",
+    )
