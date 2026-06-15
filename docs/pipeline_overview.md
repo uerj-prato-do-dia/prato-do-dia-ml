@@ -84,30 +84,18 @@ Os arquivos em `data/raw_segmentations/`, `data/masks/`, `data/overlays/`,
 `data/reports/`, `data/features/` e `outputs/` são saídas derivadas. Em geral,
 eles devem ser regenerados a partir de imagens, configurações e modelos.
 
-## Anotações com Label Studio
+## Anotações
 
-Exportações brutas do Label Studio são tratadas como insumo temporário:
+Anotações e exportações brutas devem ficar separadas das saídas derivadas. Use
+`data/ground_truth/` para as máscaras canônicas avaliadas pelo pipeline.
 
 ```text
-data/annotation_exports/labelstudio/brush_masks/*.png
-data/annotation_exports/labelstudio/result_coco.json
+data/ground_truth/<nome_da_imagem>_instances.png
 ```
 
-Elas podem ser convertidas para máscaras canônicas com:
-
-```bash
-uv run python scripts/import_labelstudio_brush.py \
-  --brush-dir data/annotation_exports/labelstudio/brush_masks \
-  --coco-json data/annotation_exports/labelstudio/result_coco.json
-```
-
-O importador associa tarefas às imagens por ordem natural: `task-1` corresponde
-a `imagem1`, `task-2` a `imagem2`, e assim por diante. Para reimportar uma
-tarefa específica:
-
-```bash
-uv run python scripts/import_labelstudio_brush.py --brush-dir data/png --task-id 4
-```
+Não há CLI de importação do Label Studio neste repositório no momento. Se uma
+exportação externa for usada, converta-a fora do pipeline ou adicione um script
+dedicado com testes antes de documentá-lo aqui.
 
 ## Validação
 

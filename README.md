@@ -51,6 +51,33 @@ Principais saídas geradas:
 - `data/reports/`: metadados e métricas de avaliação.
 - `data/features/`: atributos extraídos das instâncias segmentadas.
 
+## Interface pública para a API
+
+O backend deve consumir o pacote por `prato_do_dia_ml.inference`, não por
+classes internas do detector/segmentador:
+
+```python
+from pathlib import Path
+
+from prato_do_dia_ml.inference import FoodPredictor
+
+predictor = FoodPredictor.from_models_dir(Path("models"))
+prediction = predictor.predict_bytes(image_bytes)
+```
+
+A resposta técnica é `PredictionResponse`, com dimensões da imagem, instâncias,
+artefatos experimentais e metadados do modelo. A conversão para JSON de produto
+e estimativas nutricionais pertence ao backend da API.
+
+Erros públicos:
+
+- `MLInvalidImageError`: bytes inválidos ou imagem não decodificável.
+- `MLModelUnavailableError`: arquivos de modelo ausentes.
+- `MLInferenceError`: falha interna durante inferência.
+
+O manifesto `models/model_manifest.json` registra nome, papel, tamanho e SHA-256
+dos modelos ONNX esperados.
+
 ## Como Reproduzir
 
 Instale as dependências principais:
@@ -104,8 +131,6 @@ uv run python scripts/run_experiment.py \
   --experiment-name baseline \
   --limit 3 \
   --overwrite
-
-uv run python scripts/compare_experiments.py
 ```
 
 Testes que carregam os modelos ONNX são opcionais:
@@ -130,10 +155,9 @@ src/
 scripts/
   run_pipeline.py              # executa uma imagem
   evaluate_pipeline.py         # avalia conjunto anotado
-  import_labelstudio_brush.py  # converte máscaras do Label Studio
   extract_features.py          # exporta atributos para CSV
   run_experiment.py            # salva execução reprodutível
-  compare_experiments.py       # compara resultados salvos
+  render_mask_previews.py      # renderiza previews das máscaras
 
 configs/
   default.toml
