@@ -48,6 +48,40 @@ def test_build_manifest_discovers_images_and_preserves_manual_metadata(tmp_path:
     assert rows[1]["notes"] == "auto_discovered"
 
 
+def test_build_manifest_preserves_bad_manual_classification(tmp_path: Path) -> None:
+    input_dir = tmp_path / "data" / "input"
+    ground_truth_dir = tmp_path / "data" / "ground_truth"
+    manifest_path = tmp_path / "data" / "dataset_manifest.csv"
+    input_dir.mkdir(parents=True)
+    ground_truth_dir.mkdir(parents=True)
+    _write_image(input_dir / "imagem9.jpg", size=(640, 640), value=180)
+
+    write_manifest(
+        manifest_path,
+        [
+            {
+                "image_id": "imagem9",
+                "image_path": str(input_dir / "imagem9.jpg"),
+                "mask_path": "",
+                "source": "own",
+                "split": "bad",
+                "foods": "unknown",
+                "plate_type": "unknown",
+                "lighting": "unknown",
+                "angle": "unknown",
+                "quality": "bad",
+                "notes": "not_top_down_bad_collection_example",
+            }
+        ],
+    )
+
+    rows = build_manifest(input_dir, ground_truth_dir, manifest_path)
+
+    assert rows[0]["split"] == "bad"
+    assert rows[0]["quality"] == "bad"
+    assert rows[0]["notes"] == "not_top_down_bad_collection_example"
+
+
 def test_audit_manifest_flags_small_dark_low_contrast_and_missing_mask(tmp_path: Path) -> None:
     image_path = tmp_path / "small_dark.jpg"
     manifest_path = tmp_path / "manifest.csv"

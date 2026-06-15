@@ -43,9 +43,15 @@ def main() -> None:
     parser.add_argument("--input-dir", type=Path, default=Path("data/input"))
     parser.add_argument("--ground-truth-dir", type=Path, default=Path("data/ground_truth"))
     parser.add_argument("--output", type=Path, default=Path("data/dataset_manifest.csv"))
+    parser.add_argument("--new-default-split", default="candidate")
     args = parser.parse_args()
 
-    rows = build_manifest(args.input_dir, args.ground_truth_dir, args.output)
+    rows = build_manifest(
+        args.input_dir,
+        args.ground_truth_dir,
+        args.output,
+        new_default_split=args.new_default_split,
+    )
     write_manifest(args.output, rows)
     with_masks = sum(1 for row in rows if row["mask_path"])
     print(f"Dataset manifest: {args.output}")
@@ -54,7 +60,11 @@ def main() -> None:
 
 
 def build_manifest(
-    input_dir: Path, ground_truth_dir: Path, existing_manifest: Path | None = None
+    input_dir: Path,
+    ground_truth_dir: Path,
+    existing_manifest: Path | None = None,
+    *,
+    new_default_split: str = "candidate",
 ) -> list[dict[str, str]]:
     existing_rows = read_existing_manifest(existing_manifest) if existing_manifest is not None else {}
     rows: list[dict[str, str]] = []
@@ -63,7 +73,7 @@ def build_manifest(
         image_id = image_path.stem
         existing = existing_rows.get(image_id, {})
         mask_path = find_mask_for_image(ground_truth_dir, image_id)
-        row = default_row(image_id, image_path, mask_path)
+        row = default_row(image_id, image_path, mask_path, new_default_split)
         for column in MANUAL_COLUMNS:
             if existing.get(column):
                 row[column] = existing[column]
@@ -91,13 +101,13 @@ def read_existing_manifest(path: Path | None) -> dict[str, dict[str, str]]:
         return rows
 
 
-def default_row(image_id: str, image_path: Path, mask_path: Path | None) -> dict[str, str]:
+def default_row(image_id: str, image_path: Path, mask_path: Path | None, new_default_split: str) -> dict[str, str]:
     return {
         "image_id": image_id,
         "image_path": relative_path(image_path),
         "mask_path": relative_path(mask_path) if mask_path is not None else "",
         "source": "own",
-        "split": "baseline_eval" if mask_path is not None else "candidate",
+        "split": "baseline_eval" if mask_path is not None else new_default_split,
         "foods": "unknown",
         "plate_type": "unknown",
         "lighting": "unknown",

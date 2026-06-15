@@ -25,6 +25,12 @@ Later, when the dataset is large enough, introduce `train`, `val`, and `test`.
 Do not move the current tiny baseline set into training without first creating a
 new held-out evaluation set.
 
+The `bad` split is allowed for intentionally poor collection examples. These
+images should not be used in `baseline_eval` and should not be promoted into a
+training set unless the project scope changes. They can be useful later for
+robustness checks, UX messaging, or rejection behavior. Non-top-down images
+should normally be marked `split=bad` and `quality=bad`.
+
 ## Controlled and robust collection
 
 Aim for roughly:
@@ -99,3 +105,44 @@ outputs/dataset_audit/images_quality.csv
 
 Use the audit flags to decide whether an image belongs in `baseline_eval`,
 `candidate`, or `bad`.
+
+## Adding new phone images
+
+When adding a small batch of new phone images:
+
+1. Copy the files into `data/input/`.
+2. Use stable names such as `img_0011.jpg`, `img_0012.jpg`, and so on, or
+   continue the existing `imagemN.jpg` convention consistently.
+3. Refresh the manifest:
+
+   ```bash
+   uv run python scripts/create_dataset_manifest.py
+   ```
+
+   New rows without masks default to `split=candidate`, `quality=unknown`, and
+   `notes=auto_discovered`.
+
+4. Run the image audit:
+
+   ```bash
+   uv run python scripts/audit_dataset_images.py
+   ```
+
+5. Manually review audit flags and the images.
+6. Annotate selected good candidate images.
+7. Move annotated, top-down, usable images to `split=baseline_eval` only after a
+   valid mask exists.
+8. Mark bad or non-top-down images as `split=bad` and `quality=bad`.
+9. Re-run:
+
+   ```bash
+   uv run python scripts/create_dataset_manifest.py
+   uv run python scripts/audit_ground_truth.py
+   uv run python scripts/run_baseline_report.py
+   ```
+
+If a different default split is needed for a one-off import, use:
+
+```bash
+uv run python scripts/create_dataset_manifest.py --new-default-split candidate
+```
