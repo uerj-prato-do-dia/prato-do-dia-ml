@@ -8,6 +8,7 @@ import numpy as np
 from scripts.audit_dataset_images import AuditThresholds, audit_manifest
 from scripts.audit_ground_truth import audit_ground_truth
 from scripts.create_dataset_manifest import build_manifest, write_manifest
+from scripts.run_threshold_sweep import aggregate_config_result, best_result, parse_float_list, sweep_configs
 
 
 def test_build_manifest_discovers_images_and_preserves_manual_metadata(tmp_path: Path) -> None:
@@ -148,6 +149,57 @@ def test_ground_truth_audit_flags_missing_empty_dimension_and_single_instance(tm
     assert "empty_mask" in rows["empty"]["flags"].split(";")
     assert "dimension_mismatch" in rows["mismatch"]["flags"].split(";")
     assert "single_instance_only" in rows["mismatch"]["flags"].split(";")
+
+
+def test_threshold_sweep_helpers_parse_generate_and_select_best() -> None:
+    assert parse_float_list("0.05,0.10") == [0.05, 0.10]
+    assert sweep_configs([0.05, 0.10], [0.35]) == [
+        ("conf_0p05_nms_0p35", 0.05, 0.35),
+        ("conf_0p10_nms_0p35", 0.10, 0.35),
+    ]
+    rows = [
+        {"config_id": "a", "foreground_iou": "0.1", "instance_iou": "0.4", "recall": "0.2"},
+        {"config_id": "b", "foreground_iou": "0.2", "instance_iou": "0.3", "recall": "0.5"},
+    ]
+    assert best_result(rows, "foreground_iou")["config_id"] == "b"
+    assert best_result(rows, "instance_iou")["config_id"] == "a"
+
+
+def test_threshold_sweep_aggregates_fake_metrics() -> None:
+    result = aggregate_config_result(
+        "conf_0p05_nms_0p35",
+        0.05,
+        0.35,
+        [
+            {
+                "foreground_iou": "0.100000",
+                "instance_iou": "0.200000",
+                "dice": "0.300000",
+                "boundary_f_score": "0.400000",
+                "precision": "1.000000",
+                "recall": "0.500000",
+                "false_positives": "0",
+                "missed_instances": "2",
+                "status": "ok",
+            },
+            {
+                "foreground_iou": "0.300000",
+                "instance_iou": "0.400000",
+                "dice": "0.500000",
+                "boundary_f_score": "0.600000",
+                "precision": "0.500000",
+                "recall": "0.250000",
+                "false_positives": "1",
+                "missed_instances": "3",
+                "status": "ok",
+            },
+        ],
+    )
+
+    assert result["foreground_iou"] == "0.200000"
+    assert result["recall"] == "0.375000"
+    assert result["false_positives"] == "1"
+    assert result["missed_instances"] == "5"
 
 
 def _write_image(path: Path, *, size: tuple[int, int], value: int) -> None:
