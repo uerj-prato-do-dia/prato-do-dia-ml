@@ -1,0 +1,11 @@
+image_id,image_path,mask_path,source,split,foods,plate_type,lighting,angle,quality,notes
+imagem1,data/input/imagem1.jpg,data/ground_truth/imagem1_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem10,data/input/imagem10.jpg,,own,candidate,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem2,data/input/imagem2.jpg,data/ground_truth/imagem2_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem3,data/input/imagem3.jpg,data/ground_truth/imagem3_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem4,data/input/imagem4.jpg,data/ground_truth/imagem4_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem5,data/input/imagem5.jpg,data/ground_truth/imagem5_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem6,data/input/imagem6.jpg,data/ground_truth/imagem6_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem7,data/input/imagem7.jpg,data/ground_truth/imagem7_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem8,data/input/imagem8.jpg,data/ground_truth/imagem8_instances.png,own,baseline_eval,unknown,unknown,unknown,unknown,unknown,auto_discovered
+imagem9,data/input/imagem9.jpg,,own,candidate,unknown,unknown,unknown,unknown,unknown,auto_discovered
