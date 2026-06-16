@@ -38,10 +38,12 @@ data/evaluation_report.json
 
 # External datasets must stay outside version control
 datasets_external/
+external_models/
 
 # Experiment and training outputs
 outputs/
 runs/
+scratch/
 experiments/uecfoodpixcomplete/converted_*/
 experiments/uecfoodpixcomplete/outputs/
 experiments/uecfoodpixcomplete/**/*.pt
@@ -50,6 +52,7 @@ experiments/uecfoodpixcomplete/**/*.pt
 models/*.onnx
 models/*.pt
 *.pt
+mobileclip2_b.ts
 
 .agents/
 .codex/
