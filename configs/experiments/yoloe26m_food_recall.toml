@@ -1,0 +1,33 @@
+[experiment]
+name = "yoloe26m_food_recall"
+pipeline = "ultralytics_yoloe_zero_shot"
+dataset_split = "baseline_eval"
+
+[ultralytics]
+model_name = "yoloe26m_seg_food"
+model_path = "external_models/ultralytics/yoloe-26m-seg.pt"
+model_type = "open_vocab_food_prompts"
+confidence_threshold = 0.08
+nms_iou_threshold = 0.30
+device = "cpu"
+
+[prompts]
+classes = [
+  "rice",
+  "beans",
+  "meat",
+  "chicken",
+  "salad",
+  "tomato",
+  "pasta",
+  "potato",
+  "egg",
+  "french fries",
+  "vegetables",
+  "beef",
+  "pork",
+  "fish",
+]
+
+[evaluation]
+metrics = ["iou", "dice", "boundary_f", "precision_recall", "area_error"]

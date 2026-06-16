@@ -9,6 +9,16 @@ from scripts.audit_dataset_images import AuditThresholds, audit_manifest
 from scripts.audit_ground_truth import audit_ground_truth
 from scripts.create_dataset_manifest import build_manifest, write_manifest
 from scripts.run_threshold_sweep import aggregate_config_result, best_result, parse_float_list, sweep_configs
+from scripts.run_ultralytics_zero_shot import (
+    ModelSpec,
+    RunSpec,
+    best_with_min_precision,
+    config_id,
+    load_experiment_config,
+    make_run_specs,
+    resolve_model_path,
+    selected_model_specs,
+)
 
 
 def test_build_manifest_discovers_images_and_preserves_manual_metadata(tmp_path: Path) -> None:
@@ -200,6 +210,78 @@ def test_threshold_sweep_aggregates_fake_metrics() -> None:
     assert result["recall"] == "0.375000"
     assert result["false_positives"] == "1"
     assert result["missed_instances"] == "5"
+
+
+def test_ultralytics_zero_shot_helpers_generate_ids_and_configs() -> None:
+    model = ModelSpec("yoloe26s_seg_food", "yoloe-26s-seg.pt", "open_vocab_food_prompts", ("rice", "beans"))
+
+    assert config_id(model.name, 0.01, 0.45) == "yoloe26s_seg_food_conf_0p01_iou_0p45"
+    assert make_run_specs([model], [0.01, 0.03], [0.45]) == [
+        RunSpec("yoloe26s_seg_food_conf_0p01_iou_0p45", model, 0.01, 0.45),
+        RunSpec("yoloe26s_seg_food_conf_0p03_iou_0p45", model, 0.03, 0.45),
+    ]
+
+
+def test_ultralytics_zero_shot_model_selection_defaults_to_comparable_models() -> None:
+    class Args:
+        include_yolo11 = False
+        include_yoloe = False
+        include_mobilesam_smoke = False
+
+    specs = selected_model_specs(Args())
+
+    assert [spec.name for spec in specs] == [
+        "yolo11m_seg",
+        "yolo11l_seg",
+        "yolo11x_seg",
+        "yoloe26s_seg_food",
+        "yoloe26m_seg_food",
+    ]
+    assert specs[-1].prompts
+
+
+def test_ultralytics_zero_shot_best_with_min_precision() -> None:
+    rows = [
+        {"config_id": "high_recall_low_precision", "precision": "0.50", "recall": "0.90"},
+        {"config_id": "balanced", "precision": "0.80", "recall": "0.70"},
+        {"config_id": "conservative", "precision": "0.95", "recall": "0.40"},
+    ]
+
+    assert best_with_min_precision(rows, 0.75)["config_id"] == "balanced"
+    assert best_with_min_precision(rows, 0.99) is None
+
+
+def test_ultralytics_zero_shot_loads_experiment_config(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[ultralytics]
+model_name = "yoloe26s_seg_food"
+model_path = "external_models/ultralytics/yoloe-26s-seg.pt"
+model_type = "open_vocab_food_prompts"
+confidence_threshold = 0.10
+nms_iou_threshold = 0.30
+
+[prompts]
+classes = ["rice", "beans"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    model, confidence, nms_iou = load_experiment_config(config_path)
+
+    assert model.name == "yoloe26s_seg_food"
+    assert model.filename == "external_models/ultralytics/yoloe-26s-seg.pt"
+    assert model.prompts == ("rice", "beans")
+    assert confidence == 0.10
+    assert nms_iou == 0.30
+
+
+def test_ultralytics_zero_shot_resolves_model_paths() -> None:
+    assert resolve_model_path(Path("models-dir"), "yoloe.pt") == Path("models-dir/yoloe.pt")
+    assert resolve_model_path(Path("models-dir"), "external_models/ultralytics/yoloe.pt") == Path(
+        "external_models/ultralytics/yoloe.pt"
+    )
 
 
 def _write_image(path: Path, *, size: tuple[int, int], value: int) -> None:
