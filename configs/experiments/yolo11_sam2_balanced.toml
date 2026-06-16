@@ -1,0 +1,34 @@
+[paths]
+input_dir = "data/input"
+ground_truth_dir = "data/ground_truth"
+output_dir = "data/raw_segmentations"
+mask_dir = "data/masks"
+overlay_dir = "data/overlays"
+report_dir = "data/reports"
+
+[image]
+canonical_format = "png"
+background_rgb = [0, 0, 0]
+allow_alpha_input = true
+
+[yolo]
+model_path = "models/yolov11_food.onnx"
+imgsz = 640
+confidence_threshold = 0.03
+nms_iou_threshold = 0.30
+max_detections = 30
+
+[sam2]
+encoder_path = "models/sam2.1_hiera_tiny.encoder.onnx"
+decoder_path = "models/sam2.1_hiera_tiny.decoder.onnx"
+imgsz = 1024
+mask_threshold = 0.0
+
+[postprocess]
+min_mask_area_ratio = 0.001
+fill_holes_px = 64
+remove_components_px = 64
+overlap_policy = "highest_confidence"
+
+[evaluation]
+metrics = ["iou", "dice", "boundary_f", "precision_recall", "area_error"]
