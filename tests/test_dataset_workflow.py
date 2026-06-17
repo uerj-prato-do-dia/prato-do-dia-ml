@@ -4,10 +4,20 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 
 from scripts.audit_dataset_images import AuditThresholds, audit_manifest
 from scripts.audit_ground_truth import audit_ground_truth
 from scripts.create_dataset_manifest import build_manifest, write_manifest
+from scripts.ingest_unlabeled_dataset import discover_input_files, ingest_dataset
+from scripts.pseudo_label_unlabeled import filter_high_confidence_instances, write_pseudo_label_yolo_txt
+from scripts.render_overlay_review import (
+    load_review_items,
+    parse_mask_errors,
+    render_review,
+    review_csv_row,
+    serialize_mask_errors,
+)
 from scripts.run_threshold_sweep import aggregate_config_result, best_result, parse_float_list, sweep_configs
 from scripts.run_ultralytics_zero_shot import (
     ModelSpec,
@@ -285,6 +295,145 @@ def test_ultralytics_zero_shot_resolves_model_paths() -> None:
     )
 
 
+def test_unlabeled_ingestion_hashes_valid_images_and_reports_rejections(tmp_path: Path) -> None:
+    input_dir = tmp_path / "dataset"
+    output_dir = tmp_path / "data" / "raw" / "unlabeled"
+    report_dir = tmp_path / "outputs" / "dataset_ingestion"
+    valid_path = input_dir / "phone meal.JPG"
+    corrupt_path = input_dir / "broken.jpg"
+    _write_image(valid_path, size=(64, 48), value=180)
+    corrupt_path.write_text("not an image", encoding="utf-8")
+
+    ingested, rejected = ingest_dataset(input_dir=input_dir, output_dir=output_dir, report_dir=report_dir)
+
+    assert len(ingested) == 1
+    assert len(ingested[0].image_id) == 64
+    assert ingested[0].output_path.name == f"{ingested[0].sha256}.jpg"
+    assert ingested[0].output_path.exists()
+    assert rejected[0].source_path == corrupt_path
+    assert (report_dir / "ingested_images.csv").exists()
+    assert (report_dir / "rejected_images.csv").exists()
+
+
+def test_unlabeled_ingestion_discovers_images_recursively(tmp_path: Path) -> None:
+    input_dir = tmp_path / "dataset"
+    _write_image(input_dir / "a.jpg", size=(16, 16), value=100)
+    _write_image(input_dir / "nested" / "b.png", size=(16, 16), value=120)
+    (input_dir / "notes.txt").write_text("ignore", encoding="utf-8")
+
+    assert [path.name for path in discover_input_files(input_dir)] == ["a.jpg", "b.png"]
+
+
+def test_pseudo_label_filters_and_writes_yolo_txt(tmp_path: Path) -> None:
+    instances = [
+        {
+            "class_id": 0,
+            "class_name": "rice",
+            "confidence": 0.91,
+            "polygon": [[0.1, 0.1], [0.2, 0.1], [0.2, 0.2]],
+        },
+        {
+            "class_id": 1,
+            "class_name": "beans",
+            "confidence": 0.40,
+            "polygon": [[0.3, 0.3], [0.4, 0.3], [0.4, 0.4]],
+        },
+    ]
+
+    filtered = filter_high_confidence_instances(instances, 0.85)
+    output_path = tmp_path / "labels.txt"
+    write_pseudo_label_yolo_txt(output_path, filtered)
+
+    assert [item["class_name"] for item in filtered] == ["rice"]
+    assert output_path.read_text(encoding="utf-8") == "0 0.100000 0.100000 0.200000 0.100000 0.200000 0.200000\n"
+
+
+def test_overlay_review_loads_summary_and_marks_no_prediction(tmp_path: Path) -> None:
+    summary_path = _write_overlay_review_summary(tmp_path)
+
+    items = load_review_items(summary_path)
+
+    assert [item.image_id for item in items] == ["image_a", "image_b"]
+    assert items[0].prediction_count == 0
+    assert items[0].mask_errors == ("no_prediction",)
+    assert items[0].next_action == "needs_review"
+    assert items[0].overlay_exists
+    assert items[1].predicted_classes == "rice;beans"
+
+
+def test_overlay_review_template_rows_include_review_defaults(tmp_path: Path) -> None:
+    item = load_review_items(_write_overlay_review_summary(tmp_path))[0]
+
+    row = review_csv_row(item)
+
+    assert row["image_id"] == "image_a"
+    assert row["prediction_count"] == 0
+    assert row["image_condition"] == ""
+    assert row["mask_errors"] == '["no_prediction"]'
+    assert row["next_action"] == "needs_review"
+    assert row["notes"] == ""
+
+
+def test_overlay_review_serializes_mask_errors_as_json_arrays() -> None:
+    assert serialize_mask_errors(()) == "[]"
+    assert serialize_mask_errors(("missed_food", "hallucination")) == '["missed_food", "hallucination"]'
+    assert parse_mask_errors('["missed_food", "hallucination"]') == ("missed_food", "hallucination")
+    with pytest.raises(ValueError, match="unknown mask_errors values"):
+        serialize_mask_errors(("bad_error",))
+    with pytest.raises(ValueError, match="mask_errors must be a JSON array"):
+        parse_mask_errors("missed_food")
+
+
+def test_overlay_review_renders_static_html_template_and_manifest(tmp_path: Path) -> None:
+    summary_path = _write_overlay_review_summary(tmp_path)
+    output_dir = tmp_path / "outputs" / "reviews" / "unlabeled_v1_overlay_review"
+    items = load_review_items(summary_path)
+
+    render_review(items, output_dir, summary_path)
+
+    template = (output_dir / "review_template.csv").read_text(encoding="utf-8")
+    manifest = (output_dir / "review_manifest.json").read_text(encoding="utf-8")
+    html = (output_dir / "index.html").read_text(encoding="utf-8")
+
+    assert "image_id,image_path,overlay_path,prediction_count" in template
+    assert "image_condition,mask_errors,next_action" in template
+    assert "image_a" in template
+    assert ',"[""no_prediction""]",needs_review' in template
+    assert '"image_count": 2' in manifest
+    assert '"missing_overlay_count": 0' in manifest
+    assert "classFilter" in html
+    assert "conditionFilter" in html
+    assert "maskErrorFilter" in html
+    assert "Export review CSV" in html
+    assert 'data-field="mask_errors"' in html
+    assert "annotate_hard means" in html
+    assert "rerun_lower_threshold" not in html
+    assert "keep_for_robustness" not in html
+    assert "mask_quality" not in html
+    assert "image_quality" not in html
+    assert "image_b" in html
+    assert "image_b_predictions.json" in html
+
+
+def test_overlay_review_missing_summary_fails_clearly(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="pseudo-label summary not found"):
+        load_review_items(tmp_path / "missing.csv")
+
+
+def test_overlay_review_records_missing_overlays(tmp_path: Path) -> None:
+    summary_path = _write_overlay_review_summary(tmp_path, missing_overlay=True)
+    output_dir = tmp_path / "review"
+    items = load_review_items(summary_path)
+
+    render_review(items, output_dir, summary_path)
+
+    assert not items[1].overlay_exists
+    html = (output_dir / "index.html").read_text(encoding="utf-8")
+    manifest = (output_dir / "review_manifest.json").read_text(encoding="utf-8")
+    assert "Missing overlay" in html
+    assert '"missing_overlay_count": 1' in manifest
+
+
 def _write_image(path: Path, *, size: tuple[int, int], value: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     image = np.full((size[1], size[0], 3), value, dtype=np.uint8)
@@ -321,3 +470,52 @@ def _write_manifest_rows(manifest_path: Path, rows: list[tuple[str, Path, Path]]
         ),
         encoding="utf-8",
     )
+
+
+def _write_overlay_review_summary(tmp_path: Path, *, missing_overlay: bool = False) -> Path:
+    base_dir = tmp_path / "outputs" / "pseudo_labels" / "unlabeled_v1"
+    overlays_dir = base_dir / "overlays"
+    predictions_dir = base_dir / "predictions"
+    pseudo_json_dir = base_dir / "pseudo_labels" / "json"
+    pseudo_yolo_dir = base_dir / "pseudo_labels" / "yolo_txt"
+    image_dir = tmp_path / "data" / "raw" / "unlabeled"
+    for directory in [overlays_dir, predictions_dir, pseudo_json_dir, pseudo_yolo_dir, image_dir]:
+        directory.mkdir(parents=True)
+
+    _write_image(image_dir / "image_a.jpg", size=(32, 32), value=120)
+    _write_image(image_dir / "image_b.jpg", size=(32, 32), value=140)
+    _write_image(overlays_dir / "image_a_overlay.jpg", size=(32, 32), value=160)
+    if not missing_overlay:
+        _write_image(overlays_dir / "image_b_overlay.jpg", size=(32, 32), value=180)
+    for image_id in ["image_a", "image_b"]:
+        (predictions_dir / f"{image_id}_predictions.json").write_text("{}", encoding="utf-8")
+        (pseudo_json_dir / f"{image_id}.json").write_text("{}", encoding="utf-8")
+        (pseudo_yolo_dir / f"{image_id}.txt").write_text("", encoding="utf-8")
+
+    image_b_overlay = overlays_dir / "image_b_overlay.jpg"
+    if missing_overlay:
+        image_b_overlay = overlays_dir / "missing_overlay.jpg"
+    summary_path = base_dir / "summary.csv"
+    summary_path.write_text(
+        "\n".join(
+            [
+                (
+                    "image_id,image_path,prediction_count,high_confidence_count,predicted_classes,"
+                    "high_confidence_classes,overlay_path,pseudo_label_json,pseudo_label_yolo_txt,status,notes"
+                ),
+                (
+                    f"image_a,{image_dir / 'image_a.jpg'},0,0,,,"
+                    f"{overlays_dir / 'image_a_overlay.jpg'},{pseudo_json_dir / 'image_a.json'},"
+                    f"{pseudo_yolo_dir / 'image_a.txt'},ok,"
+                ),
+                (
+                    f"image_b,{image_dir / 'image_b.jpg'},2,1,rice;beans,rice,"
+                    f"{image_b_overlay},{pseudo_json_dir / 'image_b.json'},"
+                    f"{pseudo_yolo_dir / 'image_b.txt'},ok,"
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return summary_path

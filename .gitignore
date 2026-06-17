@@ -10,6 +10,7 @@ __pycache__/
 # Local preprocessing smoke artifacts
 data/test_*_input.png
 data/test_*_output.png
+dataset/
 
 # Transient annotation exports and conversions
 data/annotation_exports/
@@ -24,6 +25,8 @@ data/coco/
 data/UECFOODPIXCOMPLETE/
 
 # Generated pipeline outputs
+data/raw/unlabeled/*
+!data/raw/unlabeled/.gitkeep
 data/raw_segmentations/*.txt
 !data/raw_segmentations/.gitkeep
 data/overlays/*.jpg

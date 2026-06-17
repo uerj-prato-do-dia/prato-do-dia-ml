@@ -445,12 +445,20 @@ def result_to_instance_mask(result: Any, image_shape: tuple[int, int]) -> tuple[
         cv2.fillPoly(instance_mask, [pixel_points], index)
         class_id = class_ids[index - 1] if index - 1 < len(class_ids) else -1
         confidence = confidences[index - 1] if index - 1 < len(confidences) else None
+        normalized_polygon = [
+            [
+                float(np.clip(x / max(width - 1, 1), 0.0, 1.0)),
+                float(np.clip(y / max(height - 1, 1), 0.0, 1.0)),
+            ]
+            for x, y in pixel_points
+        ]
         instances.append(
             {
                 "instance_id": index,
                 "class_id": class_id,
                 "class_name": str(names.get(class_id, class_id)),
                 "confidence": confidence,
+                "polygon": normalized_polygon,
                 "point_count": int(len(pixel_points)),
             }
         )
