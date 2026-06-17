@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import tempfile
+import threading
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,11 @@ import numpy as np
 from prato_do_dia_ml.detector import YoloOnnxDetector
 from prato_do_dia_ml.pipeline import FoodSegmentationPipeline
 from prato_do_dia_ml.segmenter import SamOnnxSegmenter
+
+DEFAULT_MAX_DETECTIONS = 30
+
+_PREDICTOR_CACHE: dict[tuple[Path, Path | None], FoodPredictor] = {}
+_PREDICTOR_CACHE_LOCK = threading.Lock()
 
 
 class MLError(Exception):
@@ -74,13 +80,14 @@ class FoodPredictor:
 
     def __init__(self, pipeline: FoodSegmentationPipeline) -> None:
         self._pipeline = pipeline
+        self._lock = threading.Lock()
 
     @classmethod
     def from_models_dir(cls, models_dir: Path, config_path: Path | None = None) -> FoodPredictor:
         if config_path is not None:
             from prato_do_dia_ml.config import load_config
 
-            return cls(FoodSegmentationPipeline.from_config(load_config(config_path)))
+            return cls(_with_isolated_artifact_dirs(FoodSegmentationPipeline.from_config(load_config(config_path))))
 
         yolo_path = models_dir / "yolov11_food.onnx"
         sam_encoder_path = models_dir / "sam2.1_hiera_tiny.encoder.onnx"
@@ -90,26 +97,22 @@ class FoodPredictor:
             names = ", ".join(path.name for path in missing)
             raise MLModelUnavailableError(f"missing model files: {names}")
 
-        output_root = models_dir.parent / "data"
         pipeline = FoodSegmentationPipeline(
-            YoloOnnxDetector(yolo_path, confidence_threshold=0.15, max_detections=10),
+            YoloOnnxDetector(yolo_path, confidence_threshold=0.15, max_detections=DEFAULT_MAX_DETECTIONS),
             SamOnnxSegmenter(sam_encoder_path, sam_decoder_path),
-            output_dir=output_root / "raw_segmentations",
-            mask_dir=output_root / "masks",
-            overlay_dir=output_root / "overlays",
-            report_dir=output_root / "reports",
         )
-        return cls(pipeline)
+        return cls(_with_isolated_artifact_dirs(pipeline))
 
     def predict_bytes(self, image_bytes: bytes) -> PredictionResponse:
         image = _decode_image(image_bytes)
         height, width = image.shape[:2]
 
-        with tempfile.NamedTemporaryFile(suffix=".jpg") as handle:
-            handle.write(image_bytes)
-            handle.flush()
+        with tempfile.TemporaryDirectory(prefix="prato-do-dia-request-") as directory:
+            image_path = Path(directory) / "input.jpg"
+            image_path.write_bytes(image_bytes)
             try:
-                result = self._pipeline.run_image(Path(handle.name))
+                with self._lock:
+                    result = self._pipeline.run_image(image_path)
             except MLError:
                 raise
             except Exception as exc:
@@ -164,8 +167,27 @@ class FoodPredictor:
 
 def predict(image_bytes: bytes, models_dir: Path | None = None) -> PredictionResponse:
     root = Path(__file__).resolve().parent.parent
-    predictor = FoodPredictor.from_models_dir(models_dir or root / "models")
+    predictor = get_predictor(models_dir or root / "models")
     return predictor.predict_bytes(image_bytes)
+
+
+def get_predictor(models_dir: Path, config_path: Path | None = None) -> FoodPredictor:
+    key = (models_dir.resolve(), config_path.resolve() if config_path is not None else None)
+    with _PREDICTOR_CACHE_LOCK:
+        predictor = _PREDICTOR_CACHE.get(key)
+        if predictor is None:
+            predictor = FoodPredictor.from_models_dir(models_dir, config_path)
+            _PREDICTOR_CACHE[key] = predictor
+        return predictor
+
+
+def _with_isolated_artifact_dirs(pipeline: FoodSegmentationPipeline) -> FoodSegmentationPipeline:
+    output_root = Path(tempfile.mkdtemp(prefix="prato-do-dia-inference-"))
+    pipeline.output_dir = output_root / "raw_segmentations"
+    pipeline.mask_dir = output_root / "masks"
+    pipeline.overlay_dir = output_root / "overlays"
+    pipeline.report_dir = output_root / "reports"
+    return pipeline
 
 
 def _decode_image(image_bytes: bytes) -> np.ndarray:

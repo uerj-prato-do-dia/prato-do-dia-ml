@@ -341,7 +341,11 @@ def load_ultralytics_model(model_path: Path, prompts: tuple[str, ...]) -> Any:
 
 def resolve_model_path(models_dir: Path, filename: str) -> Path:
     path = Path(filename)
-    if path.is_absolute() or path.parent != Path("."):
+    if path.is_absolute():
+        return path
+    if models_dir != Path("."):
+        return models_dir / path.name
+    if path.parent != Path("."):
         return path
     return models_dir / path
 

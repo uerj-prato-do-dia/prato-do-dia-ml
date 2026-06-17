@@ -279,7 +279,8 @@ classes = ["rice", "beans"]
 
 def test_ultralytics_zero_shot_resolves_model_paths() -> None:
     assert resolve_model_path(Path("models-dir"), "yoloe.pt") == Path("models-dir/yoloe.pt")
-    assert resolve_model_path(Path("models-dir"), "external_models/ultralytics/yoloe.pt") == Path(
+    assert resolve_model_path(Path("models-dir"), "external_models/ultralytics/yoloe.pt") == Path("models-dir/yoloe.pt")
+    assert resolve_model_path(Path("."), "external_models/ultralytics/yoloe.pt") == Path(
         "external_models/ultralytics/yoloe.pt"
     )
 
