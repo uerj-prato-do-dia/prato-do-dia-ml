@@ -52,6 +52,16 @@ known-first-party = ["prato_do_dia_ml"]
 [tool.uv]
 package = true
 
+[tool.deptry]
+known_first_party = ["prato_do_dia_ml", "scripts"]
+
+[tool.deptry.package_module_name_map]
+opencv-python = "cv2"
+scikit-image = "skimage"
+
+[tool.deptry.per_rule_ignores]
+DEP004 = ["ultralytics"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
