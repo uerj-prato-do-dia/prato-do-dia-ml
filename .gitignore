@@ -21,8 +21,10 @@ data/label-to-numpy/
 data/png/
 data/numpy/
 data/npy/
-data/coco/
 data/UECFOODPIXCOMPLETE/
+datasets_external/
+**/UECFOODPIXCOMPLETE/
+**/UECFOODPIX*
 
 # Generated pipeline outputs
 data/raw/unlabeled/*

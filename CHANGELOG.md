@@ -9,6 +9,15 @@ phase-based version history until the first production release.
 
 ### Added
 
+- Added unified dataset curation module `prato_do_dia_ml/dataset_curation.py` with Laplacian variance sharpness screening and 64-bit pHash Hamming distance deduplication.
+- Added MLOps Douglas-Peucker polygon simplification utility `scripts/simplify_yolo_labels.py` and real-time auto-simplifier daemon `scripts/watch_and_simplify.py`.
+- Added interactive 1-click crop tool `scripts/crop_manual.py` with Flutter circular camera overlay guide and dynamic `J/K/L` zoom scaling.
+
+### Removed
+
+- Removed legacy scripts (`crop_manual.py`, `preprocess_raw_images.py`, `evaluate_pipeline.py`, `extract_features.py`, `render_mask_previews.py`) in strict adherence to Occam's Razor and flat directory conventions.
+- Consolidated curation scripts into `scripts/filter_zenithal.py` and `scripts/deduplicate.py`.
+
 - Added pytest-based tests under `tests/` with an `onnx` marker for real model
   inference checks.
 - Added Ruff, pytest, pre-commit, EditorConfig, VS Code recommendations, and a

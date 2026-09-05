@@ -187,7 +187,7 @@ def _gpu_name() -> str:
     return ", ".join(names) if names else "unknown"
 
 
-def _to_yaml(value: Any, indent: int = 0) -> str:
+def _to_yaml(value: object, indent: int = 0) -> str:
     prefix = " " * indent
     if isinstance(value, dict):
         lines: list[str] = []
@@ -205,7 +205,7 @@ def _to_yaml(value: Any, indent: int = 0) -> str:
     return f"{prefix}{_format_scalar(value)}"
 
 
-def _format_scalar(value: Any) -> str:
+def _format_scalar(value: object) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
     if value is None:

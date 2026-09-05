@@ -24,6 +24,7 @@ class LetterboxResult:
 def letterbox_image(
     image: np.ndarray,
     size: int | tuple[int, int] = 640,
+    target_size: int | tuple[int, int] | None = None,
     padding_value: int | Sequence[int] = 114,
     interpolation: int = cv2.INTER_LINEAR,
 ) -> LetterboxResult:
@@ -32,6 +33,7 @@ def letterbox_image(
     Args:
         image: Input image as HxW or HxWxC numpy array.
         size: Output size as an integer square size or ``(height, width)``.
+        target_size: Alias for size parameter for backward compatibility.
         padding_value: Border value passed to OpenCV. Use BGR order for color images.
         interpolation: OpenCV interpolation flag used for the proportional resize.
 
@@ -46,7 +48,8 @@ def letterbox_image(
     if source_height <= 0 or source_width <= 0:
         raise ValueError("image dimensions must be positive")
 
-    target_height, target_width = _normalize_size(size)
+    effective_size = target_size if target_size is not None else size
+    target_height, target_width = _normalize_size(effective_size)
     scale = min(target_width / source_width, target_height / source_height)
     resized_width = max(1, int(round(source_width * scale)))
     resized_height = max(1, int(round(source_height * scale)))

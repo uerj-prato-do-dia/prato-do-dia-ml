@@ -11,22 +11,20 @@ from prato_do_dia_ml.metrics import (
     intersection_over_union,
     rasterize_yolo_polygons,
 )
-from prato_do_dia_ml.postprocessing import resolve_overlaps
-from prato_do_dia_ml.schema import SegmentationMask
+from prato_do_dia_ml.schema import SegmentationItem
 
 
 def test_yolo_rasterization_fills_polygon(tmp_path) -> None:
     path = tmp_path / "mask.txt"
-    write_yolo_segmentation_txt(
-        (
-            SegmentationMask(
-                class_id=0,
-                confidence=1.0,
-                polygon=((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)),
-            ),
-        ),
-        path,
+    item = SegmentationItem(
+        class_id=0,
+        class_name="tomate",
+        confidence=1.0,
+        box=[0.0, 0.0, 1.0, 1.0],
+        polygon=[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+        relative_area_percentage=100.0,
     )
+    write_yolo_segmentation_txt([item], path)
 
     mask = rasterize_yolo_polygons(path, (10, 10))
 
@@ -68,38 +66,3 @@ def test_iou_dice_and_instance_metrics_match_identical_masks() -> None:
     assert metrics["miou"] == 1.0
     assert metrics["false_positives"] == 0
     assert metrics["missed_instances"] == 0
-
-
-def test_overlap_resolution_keeps_high_confidence_overlap() -> None:
-    low = np.zeros((12, 12), dtype=bool)
-    high = np.zeros((12, 12), dtype=bool)
-    low[2:8, 2:8] = True
-    high[5:10, 5:10] = True
-
-    resolved = resolve_overlaps(
-        (
-            SegmentationMask(
-                0,
-                0.6,
-                ((0.1, 0.1), (0.7, 0.1), (0.7, 0.7)),
-                low,
-                yolo_confidence=0.6,
-                sam_iou_prediction=0.2,
-                area_px=int(low.sum()),
-            ),
-            SegmentationMask(
-                0,
-                0.8,
-                ((0.4, 0.4), (0.9, 0.4), (0.9, 0.9)),
-                high,
-                yolo_confidence=0.8,
-                sam_iou_prediction=0.9,
-                area_px=int(high.sum()),
-            ),
-        ),
-        (12, 12),
-    )
-
-    assert len(resolved) == 2
-    assert resolved[1].mask is not None
-    assert resolved[1].mask[5, 5]

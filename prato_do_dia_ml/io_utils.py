@@ -6,6 +6,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from PIL import Image, ImageOps
 
 SUPPORTED_IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".heic")
 
@@ -13,32 +14,21 @@ SUPPORTED_IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".heic")
 def load_image_bgr(
     path: str | Path,
     background_rgb: tuple[int, int, int] = (0, 0, 0),
-    allow_alpha: bool = True,
+    allow_alpha: bool = False,
 ) -> np.ndarray:
-    """Load an image as BGR uint8, replacing transparent pixels if present."""
-
+    """Load an image as BGR uint8 with EXIF orientation correction and strict 3-channel conversion."""
     image_path = Path(path)
-    image = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
-    if image is None:
+    if not image_path.exists():
         raise FileNotFoundError(f"could not load image: {image_path}")
-    if image.dtype != np.uint8:
-        raise ValueError(f"image must be uint8: {image_path}")
-    if image.ndim == 2:
-        return cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    if image.ndim != 3:
-        raise ValueError(f"unsupported image shape for {image_path}: {image.shape}")
-    if image.shape[2] == 3:
-        return image
-    if image.shape[2] != 4:
-        raise ValueError(f"unsupported channel count for {image_path}: {image.shape[2]}")
-    if not allow_alpha:
-        raise ValueError(f"alpha channel is not allowed: {image_path}")
 
-    bgr = image[:, :, :3].copy()
-    alpha = image[:, :, 3]
-    background_bgr = np.array(background_rgb[::-1], dtype=np.uint8)
-    bgr[alpha == 0] = background_bgr
-    return bgr
+    try:
+        with Image.open(image_path) as img:
+            transposed = ImageOps.exif_transpose(img)
+            rgb = transposed.convert("RGB")
+            bgr = cv2.cvtColor(np.array(rgb), cv2.COLOR_RGB2BGR)
+            return bgr
+    except Exception as exc:
+        raise ValueError(f"could not load image {image_path}: {exc}") from exc
 
 
 def input_images(input_dir: str | Path) -> list[Path]:

@@ -10,6 +10,42 @@ from prato_do_dia_ml.annotations import mask_to_polygon
 from prato_do_dia_ml.schema import SegmentationMask
 
 
+def remove_small_components(mask: np.ndarray, min_component_px: int = 64) -> np.ndarray:
+    """Remove small connected components from binary boolean mask."""
+    binary = mask.astype(bool)
+    labels, count = ndimage.label(binary)
+    kept = np.zeros(binary.shape, dtype=bool)
+    for label_id in range(1, count + 1):
+        component = labels == label_id
+        if int(component.sum()) >= min_component_px:
+            kept |= component
+    return kept
+
+
+def fill_small_holes(mask: np.ndarray, fill_holes_px: int = 64) -> np.ndarray:
+    """Fill small holes in binary boolean mask."""
+    kept = mask.astype(bool)
+    if fill_holes_px > 0 and np.any(kept):
+        inverse_labels, inverse_count = ndimage.label(~kept)
+        border_labels = set(np.unique(inverse_labels[0, :]))
+        border_labels.update(np.unique(inverse_labels[-1, :]))
+        border_labels.update(np.unique(inverse_labels[:, 0]))
+        border_labels.update(np.unique(inverse_labels[:, -1]))
+        for label_id in range(1, inverse_count + 1):
+            if label_id in border_labels:
+                continue
+            hole = inverse_labels == label_id
+            if int(hole.sum()) <= fill_holes_px:
+                kept |= hole
+    return kept
+
+
+def cleanup_mask(mask: np.ndarray, min_component_px: int = 64, fill_holes_px: int = 64) -> np.ndarray:
+    """Remove small connected components and fill small holes."""
+    kept = remove_small_components(mask, min_component_px)
+    return fill_small_holes(kept, fill_holes_px)
+
+
 def postprocess_segmentations(
     segmentations: tuple[SegmentationMask, ...],
     image_shape: tuple[int, int],
@@ -52,33 +88,6 @@ def postprocess_segmentations(
         )
 
     return resolve_overlaps(tuple(cleaned), image_shape)
-
-
-def cleanup_mask(mask: np.ndarray, min_component_px: int, fill_holes_px: int) -> np.ndarray:
-    """Remove small connected components and fill small holes."""
-
-    binary = mask.astype(bool)
-    labels, count = ndimage.label(binary)
-    kept = np.zeros(binary.shape, dtype=bool)
-    for label_id in range(1, count + 1):
-        component = labels == label_id
-        if int(component.sum()) >= min_component_px:
-            kept |= component
-
-    if fill_holes_px > 0 and np.any(kept):
-        inverse_labels, inverse_count = ndimage.label(~kept)
-        border_labels = set(np.unique(inverse_labels[0, :]))
-        border_labels.update(np.unique(inverse_labels[-1, :]))
-        border_labels.update(np.unique(inverse_labels[:, 0]))
-        border_labels.update(np.unique(inverse_labels[:, -1]))
-        for label_id in range(1, inverse_count + 1):
-            if label_id in border_labels:
-                continue
-            hole = inverse_labels == label_id
-            if int(hole.sum()) <= fill_holes_px:
-                kept |= hole
-
-    return kept
 
 
 def resolve_overlaps(

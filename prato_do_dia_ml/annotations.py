@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
 import cv2
@@ -12,7 +13,7 @@ from prato_do_dia_ml.schema import SegmentationMask
 
 
 def write_yolo_segmentation_txt(
-    masks: tuple[SegmentationMask, ...],
+    items: Sequence[object],
     output_path: str | Path,
 ) -> Path:
     """Write normalized YOLO segmentation polygons to a TXT file."""
@@ -20,19 +21,22 @@ def write_yolo_segmentation_txt(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    lines = [_format_mask(mask) for mask in masks]
+    lines = [_format_item(item) for item in items]
     path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
     return path
 
 
-def _format_mask(mask: SegmentationMask) -> str:
-    if mask.class_id < 0:
+def _format_item(item: object) -> str:
+    cid = getattr(item, "class_id", 0)
+    polygon = getattr(item, "polygon", [])
+    if cid < 0:
         raise ValueError("class_id must be non-negative")
-    if len(mask.polygon) < 3:
+    if len(polygon) < 3:
         raise ValueError("YOLO segmentation polygons require at least 3 points")
 
-    values: list[str] = [str(mask.class_id)]
-    for x, y in mask.polygon:
+    values: list[str] = [str(cid)]
+    for pt in polygon:
+        x, y = pt[0], pt[1]
         if not 0.0 <= x <= 1.0 or not 0.0 <= y <= 1.0:
             raise ValueError("polygon coordinates must be normalized to [0, 1]")
         values.extend((f"{x:.6f}", f"{y:.6f}"))

@@ -9,6 +9,15 @@ import onnxruntime as ort
 CPU_PROVIDERS = ["CPUExecutionProvider"]
 
 
+def create_cpu_session_options() -> ort.SessionOptions:
+    """Create session options locking ONNX CPU execution to a single thread in sequential mode."""
+    opts = ort.SessionOptions()
+    opts.intra_op_num_threads = 1
+    opts.inter_op_num_threads = 1
+    opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+    return opts
+
+
 def create_cpu_session(model_path: str | Path) -> ort.InferenceSession:
     """Create an ONNX Runtime session after validating the model path."""
 
@@ -16,9 +25,5 @@ def create_cpu_session(model_path: str | Path) -> ort.InferenceSession:
     if not path.is_file():
         raise FileNotFoundError(f"ONNX model not found: {path}")
 
-    opts = ort.SessionOptions()
-    opts.intra_op_num_threads = 1
-    opts.inter_op_num_threads = 1
-    opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
-
+    opts = create_cpu_session_options()
     return ort.InferenceSession(str(path), sess_options=opts, providers=CPU_PROVIDERS)

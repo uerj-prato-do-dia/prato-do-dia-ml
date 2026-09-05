@@ -1,24 +1,24 @@
 [project]
 name = "prato-do-dia-yolo-sam"
 version = "0.2.0"
-description = "YOLO11 and SAM 2 food segmentation pipeline for Prato do Dia."
+description = "YOLO11-seg food segmentation microservice for Prato do Dia."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+  "fastapi>=0.110.0",
   "numpy>=2.0.0",
   "onnxruntime>=1.18.0",
   "opencv-python>=4.10.0",
   "pandas>=3.0.3",
+  "python-multipart>=0.0.9",
   "scikit-image>=0.26.0",
   "scipy>=1.17.1",
+  "uvicorn[standard]>=0.28.0",
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+  "httpx>=0.27.0",
   "pre-commit>=4.6.0",
   "pytest>=9.0.3",
   "ruff>=0.15.15",
@@ -27,8 +27,23 @@ models = [
   "huggingface-hub>=1.17.0",
 ]
 train = [
+  "onnx>=1.16.0",
+  "torch>=2.2.0",
+  "torchvision>=0.17.0",
   "ultralytics>=8.4.60",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool]
+
+[tool.hatch]
+
+[tool.hatch.build]
+
+[tool.hatch.build.targets]
 
 [tool.hatch.build.targets.wheel]
 packages = ["prato_do_dia_ml"]
@@ -67,7 +82,9 @@ opencv-python = "cv2"
 scikit-image = "skimage"
 
 [tool.deptry.per_rule_ignores]
-DEP004 = ["ultralytics"]
+DEP004 = ["ultralytics", "onnx", "torch"]
+
+[tool.pytest]
 
 [tool.pytest.ini_options]
 addopts = "-m 'not onnx'"

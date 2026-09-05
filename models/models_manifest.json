@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "filename": "yolov11_food.onnx",
+      "role": "detector",
+      "size_bytes": 10741341,
+      "sha256": "4ac77a556992be1f2ec2924441b49a4bd406bae2719e6dc293948acc086d98e4"
+    },
+    {
+      "filename": "sam2.1_hiera_tiny.encoder.onnx",
+      "role": "sam_encoder",
+      "size_bytes": 134261315,
+      "sha256": "4cc015ee18520e93f8c7ddfeaca7436039daaaaf19721b4b96a8810a805e82f7"
+    },
+    {
+      "filename": "sam2.1_hiera_tiny.decoder.onnx",
+      "role": "sam_decoder",
+      "size_bytes": 20640886,
+      "sha256": "f5a4bd656c143899fb7f52d64ed81e6f6aeb37d477a0b6da50146ac7cf2187bf"
+    }
+  ]
+}
