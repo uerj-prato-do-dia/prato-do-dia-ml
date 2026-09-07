@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -12,7 +11,6 @@ import cv2
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 GROUND_TRUTH_COLUMNS = [
     "image_id",

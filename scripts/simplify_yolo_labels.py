@@ -15,15 +15,12 @@ import argparse
 import json
 import logging
 import shutil
-import sys
 import unicodedata
 from pathlib import Path
 from typing import Any
 
 import cv2
 import numpy as np
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from prato_do_dia_ml.annotations import write_yolo_segmentation_txt
 from prato_do_dia_ml.schema import CLASS_ID_TO_NAME, SegmentationMask

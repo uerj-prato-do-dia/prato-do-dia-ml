@@ -6,7 +6,6 @@ import argparse
 import csv
 import hashlib
 import shutil
-import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,7 +13,6 @@ from pathlib import Path
 import cv2
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from prato_do_dia_ml.io_utils import SUPPORTED_IMAGE_SUFFIXES, load_image_bgr
 

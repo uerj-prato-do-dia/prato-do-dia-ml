@@ -11,34 +11,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from pathlib import Path
 
-# Add scripts directory and package root to sys.path
-SCRIPTS_DIR = Path(__file__).resolve().parent
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-if str(SCRIPTS_DIR.parent) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR.parent))
+from scripts.simplify_yolo_labels import (
+    convert_labelme_to_yolo_segmentation,
+    simplify_json_file,
+)
 
-try:
-    from simplify_yolo_labels import (
-        convert_labelme_to_yolo_segmentation,
-        simplify_json_file,
-    )
-except ImportError:
-    from scripts.simplify_yolo_labels import (
-        convert_labelme_to_yolo_segmentation,
-        simplify_json_file,
-    )
-except ModuleNotFoundError:
-    from simplify_yolo_labels import (
-        convert_labelme_to_yolo_segmentation,
-        simplify_json_file,
-    )
-
-PROJECT_ROOT = SCRIPTS_DIR.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_LABELS_DIR = PROJECT_ROOT / "data" / "processed" / "labels"
 
 
