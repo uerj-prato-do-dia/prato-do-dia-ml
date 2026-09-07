@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -25,6 +26,39 @@ CLASS_ID_TO_NAME: dict[int, str] = {
     14: "estrogonofe",
     15: "carne_bovina_bife",
 }
+
+
+def get_canonical_classes() -> list[str]:
+    """Return ordered list of canonical food class names [index 0..N-1]."""
+    return [CLASS_ID_TO_NAME[i] for i in sorted(CLASS_ID_TO_NAME.keys())]
+
+
+def write_classes_txt(output_path: str | Path) -> Path:
+    """Write canonical classes.txt file from Python Single Source of Truth."""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = get_canonical_classes()
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def sync_all_classes_txt(project_root: str | Path | None = None) -> list[Path]:
+    """Synchronize all project classes.txt files against Python Single Source of Truth."""
+    if project_root is None:
+        project_root = Path(__file__).resolve().parent.parent.parent
+    root = Path(project_root)
+
+    target_paths = [
+        root / "prato-do-dia-ml" / "data" / "classes.txt",
+        root / "data" / "processed" / "labels" / "classes.txt",
+        root / "data" / "raw" / "classes.txt",
+    ]
+
+    updated: list[Path] = []
+    for target in target_paths:
+        updated.append(write_classes_txt(target))
+    return updated
+
 
 BBoxXYXY = tuple[float, float, float, float]
 Point = tuple[float, float]

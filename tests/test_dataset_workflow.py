@@ -180,6 +180,28 @@ def test_unlabeled_ingestion_discovers_images_recursively(tmp_path: Path) -> Non
     assert [path.name for path in discover_input_files(input_dir)] == ["a.jpg", "b.png"]
 
 
+def test_sync_classes_txt_generates_canonical_file(tmp_path: Path) -> None:
+    from prato_do_dia_ml.schema import get_canonical_classes, sync_all_classes_txt, write_classes_txt
+
+    classes = get_canonical_classes()
+    assert len(classes) == 16
+    assert classes[0] == "tomate"
+    assert classes[4] == "arroz"
+
+    output_file = tmp_path / "classes.txt"
+    write_classes_txt(output_file)
+    assert output_file.exists()
+    lines = output_file.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 16
+    assert lines[0] == "tomate"
+
+    synced = sync_all_classes_txt(project_root=tmp_path)
+    assert len(synced) == 3
+    for p in synced:
+        assert p.exists()
+        assert p.read_text(encoding="utf-8").splitlines()[0] == "tomate"
+
+
 def _write_image(path: Path, *, size: tuple[int, int], value: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     image = np.full((size[1], size[0], 3), value, dtype=np.uint8)
