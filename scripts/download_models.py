@@ -77,7 +77,11 @@ def download_and_verify(
         # In production, download from remote storage bucket (e.g. S3 / GCS / Releases)
         # Here we verify existing or mock local storage
         if not target_path.exists():
-            logging.error("✘ Model file '%s' missing from %s. Please place valid file or download from storage.", filename, models_dir)
+            logging.error(
+                "✘ Model file '%s' missing from %s. Please place valid file or download from storage.",
+                filename,
+                models_dir,
+            )
             all_valid = False
             continue
 
@@ -85,7 +89,9 @@ def download_and_verify(
         if actual_sha.lower() == expected_sha.lower():
             logging.info("✔ Successfully verified SHA-256 for '%s'.", filename)
         else:
-            logging.error("✘ SHA-256 validation failed for '%s'! Expected: %s, Got: %s", filename, expected_sha, actual_sha)
+            logging.error(
+                "✘ SHA-256 validation failed for '%s'! Expected: %s, Got: %s", filename, expected_sha, actual_sha
+            )
             all_valid = False
 
     return all_valid

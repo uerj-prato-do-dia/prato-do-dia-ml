@@ -84,4 +84,3 @@ def test_convert_labelme_to_yolo_segmentation(tmp_path) -> None:
     # Check class IDs: 0 (tomate) and 11 (frango_grelhado)
     assert lines[0].startswith("0 ")
     assert lines[1].startswith("11 ")
-

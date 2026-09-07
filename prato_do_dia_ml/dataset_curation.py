@@ -41,13 +41,19 @@ def evaluate_image_quality(
 
     aspect_ratio = max(w / h, h / w)
     if aspect_ratio > max_aspect_ratio:
-        return QualityEvaluation(False, f"Proporção panorâmica excessiva ({aspect_ratio:.2f} > {max_aspect_ratio})", 0.0, aspect_ratio)
+        return QualityEvaluation(
+            False, f"Proporção panorâmica excessiva ({aspect_ratio:.2f} > {max_aspect_ratio})", 0.0, aspect_ratio
+        )
 
     sharpness = calculate_sharpness(bgr)
     if sharpness < min_sharpness:
-        return QualityEvaluation(False, f"Imagem desfocada/borrada (nitidez: {sharpness:.1f} < {min_sharpness})", sharpness, aspect_ratio)
+        return QualityEvaluation(
+            False, f"Imagem desfocada/borrada (nitidez: {sharpness:.1f} < {min_sharpness})", sharpness, aspect_ratio
+        )
 
-    return QualityEvaluation(True, f"Aprovada (nitidez: {sharpness:.1f}, proporção: {aspect_ratio:.2f})", sharpness, aspect_ratio)
+    return QualityEvaluation(
+        True, f"Aprovada (nitidez: {sharpness:.1f}, proporção: {aspect_ratio:.2f})", sharpness, aspect_ratio
+    )
 
 
 def compute_phash(image_path: Path, hash_size: int = 8) -> np.ndarray:

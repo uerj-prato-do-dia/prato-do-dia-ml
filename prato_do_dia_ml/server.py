@@ -53,7 +53,6 @@ app = FastAPI(
 )
 
 
-
 class HealthStatusResponse(TypedDict):
     status: str
     service: str

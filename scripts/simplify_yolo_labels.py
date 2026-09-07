@@ -149,12 +149,8 @@ def simplify_polygon(
     if len(coords) < 6 or len(coords) % 2 != 0:
         return class_id, coords, len(coords) // 2, len(coords) // 2
 
-    pts_pixel = [
-        [coords[i] * img_w, coords[i + 1] * img_h] for i in range(0, len(coords), 2)
-    ]
-    simp_pts, orig_count, simp_count = simplify_pts(
-        pts_pixel, epsilon_ratio=epsilon_ratio, img_w=img_w, img_h=img_h
-    )
+    pts_pixel = [[coords[i] * img_w, coords[i + 1] * img_h] for i in range(0, len(coords), 2)]
+    simp_pts, orig_count, simp_count = simplify_pts(pts_pixel, epsilon_ratio=epsilon_ratio, img_w=img_w, img_h=img_h)
 
     if simp_count < 3:
         return class_id, coords, orig_count, orig_count
@@ -194,9 +190,7 @@ def simplify_json_file(
     for shape in shapes:
         pts = shape.get("points", [])
         if len(pts) >= 3:
-            simp_pts, orig_cnt, simp_cnt = simplify_pts(
-                pts, epsilon_ratio=epsilon_ratio, img_w=img_w, img_h=img_h
-            )
+            simp_pts, orig_cnt, simp_cnt = simplify_pts(pts, epsilon_ratio=epsilon_ratio, img_w=img_w, img_h=img_h)
             shape["points"] = simp_pts
             total_polys += 1
             file_orig_v += orig_cnt
@@ -229,9 +223,7 @@ def simplify_yolo_file(
             class_id = int(parts[0])
             coords = [float(v) for v in parts[1:]]
 
-            cid, simp_coords, orig_cnt, simp_cnt = simplify_polygon(
-                class_id, coords, epsilon_ratio=epsilon_ratio
-            )
+            cid, simp_coords, orig_cnt, simp_cnt = simplify_polygon(class_id, coords, epsilon_ratio=epsilon_ratio)
 
             coords_str = " ".join(f"{c:.6f}" for c in simp_coords)
             output_lines.append(f"{cid} {coords_str}")
@@ -291,9 +283,7 @@ def process_directory(
             txt_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
 
     reduction_pct = (
-        ((total_orig_vertices - total_simp_vertices) / total_orig_vertices * 100.0)
-        if total_orig_vertices > 0
-        else 0.0
+        ((total_orig_vertices - total_simp_vertices) / total_orig_vertices * 100.0) if total_orig_vertices > 0 else 0.0
     )
 
     return {

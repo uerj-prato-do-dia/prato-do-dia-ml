@@ -91,7 +91,9 @@ def filter_images(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Filtra fotos nítidas e zenitais de data/raw para data/interim.")
-    parser.add_argument("--min-sharpness", type=float, default=80.0, help="Limiar mínimo de nitidez (Laplacian variance)")
+    parser.add_argument(
+        "--min-sharpness", type=float, default=80.0, help="Limiar mínimo de nitidez (Laplacian variance)"
+    )
     args = parser.parse_args()
 
     filter_images(min_sharpness=args.min_sharpness)

@@ -67,7 +67,9 @@ def deduplicate(
             if dist <= max_distance:
                 is_dup = True
                 duplicate_files.add(img_path)
-                print(f"  👯‍♂️ [DUPLICATA] {img_path.name} é quase idêntica a {original_path.name} (distância pHash: {dist} <= {max_distance})")
+                print(
+                    f"  👯‍♂️ [DUPLICATA] {img_path.name} é quase idêntica a {original_path.name} (distância pHash: {dist} <= {max_distance})"
+                )
                 break
 
         if not is_dup:
@@ -81,14 +83,20 @@ def deduplicate(
     print("\n📊 Resultado da Deduplicação:")
     print(f"  - Total analisadas: {len(files)}")
     print(f"  - Imagens únicas mantidas: {kept_count}")
-    print(f"  - Duplicatas segregadas (movidas para {duplicates_dir.relative_to(PROJECT_ROOT)}): {len(duplicate_files)}")
+    print(
+        f"  - Duplicatas segregadas (movidas para {duplicates_dir.relative_to(PROJECT_ROOT)}): {len(duplicate_files)}"
+    )
 
     return kept_count, len(duplicate_files)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Identifica e segrega imagens quase idênticas (near-duplicates) usando pHash.")
-    parser.add_argument("--max-distance", type=int, default=5, help="Distância máxima de Hamming para considerar duplicata (default: 5)")
+    parser = argparse.ArgumentParser(
+        description="Identifica e segrega imagens quase idênticas (near-duplicates) usando pHash."
+    )
+    parser.add_argument(
+        "--max-distance", type=int, default=5, help="Distância máxima de Hamming para considerar duplicata (default: 5)"
+    )
     args = parser.parse_args()
 
     deduplicate(max_distance=args.max_distance)
