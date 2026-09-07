@@ -3,7 +3,7 @@ name = "prato-do-dia-yolo-sam"
 version = "0.2.0"
 description = "YOLO11-seg food segmentation microservice for Prato do Dia."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.110.0",
   "numpy>=2.0.0",
